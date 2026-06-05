@@ -1,0 +1,339 @@
+{
+    "setColors": "Farben festlegen",
+    "defineYourHabits": "Definiere deine Gewohnheiten",
+    "month": "Monat",
+    "close": "Schließen",
+    "habit": "Gewohnheit",
+    "save": "Speichern",
+    "showSanction": "Strafe anzeigen",
+    "reset": "Zurücksetzen",
+    "successful": "Erfolgreich",
+    "allHabitsWillBeReplaced": "Alle Gewohnheiten werden durch Gewohnheiten aus der Sicherung ersetzt.",
+    "warning": "Warnung",
+    "notSoSuccessful": "Nicht so erfolgreich",
+    "logYourDays": "Tage protokollieren",
+    "habits": "Gewohnheiten:",
+    "haboNeedsPermission": "Habo benötigt die Erlaubnis, Benachrichtigungen zu senden, um richtig zu funktionieren.",
+    "habitLoop": "Gewohnheitsschleife",
+    "restoreFailedError": "FEHLER: Wiederherstellen der Sicherung fehlgeschlagen.",
+    "sanction": "Strafe",
+    "doNotForgetToCheckYourHabits": "Vergiss nicht, deine Gewohnheiten zu überprüfen.",
+    "soundEffects": "Klangeffekte",
+    "createHabit": "Gewohnheit erstellen",
+    "create": "Erstellen",
+    "routineNumbered": "2. Routine",
+    "date": "Datum",
+    "total": "Gesamt",
+    "ohNoSanction": "Oh nein! Deine Strafe:",
+    "unknown": "Unbekannt",
+    "habitTitleEmptyError": "Der Titel der Gewohnheit darf nicht leer sein.",
+    "donateToCharity": "10 $ für wohltätige Zwecke spenden",
+    "habitDeleted": "Gewohnheit gelöscht.",
+    "onboarding": "Einarbeitung",
+    "useTwoDayRule": "Zwei-Tage-Regel verwenden",
+    "restore": "Wiederherstellen",
+    "yourCommentHere": "Deine Notiz hier",
+    "do50PushUps": "50 Liegestütze machen",
+    "noDataAboutHabits": "Es gibt keine Daten über Gewohnheiten.",
+    "theme": "Thema",
+    "exercise": "Übung",
+    "termsAndConditions": "Bedingungen und Konditionen",
+    "congratulationsReward": "Herzlichen Glückwunsch! Deine Belohnung:",
+    "createYourFirstHabit": "Erstelle deine erste Gewohnheit.",
+    "delete": "Löschen",
+    "advancedHabitBuilding": "Fortgeschrittene Gewohnheitsbildung",
+    "privacyPolicy": "Datenschutzerklärung",
+    "at7AM": "Um 07:00",
+    "rewardNumbered": "3. Belohnung",
+    "notificationTime": "Benachrichtigungszeit",
+    "notifications": "Benachrichtigungen",
+    "habitContract": "Gewohnheitsvertrag",
+    "skip": "Überspringen",
+    "backup": "Sicherung",
+    "remainderOfSanction": "Die Erinnerung an die Strafe nach einer erfolglosen Übung.",
+    "about": "Über",
+    "habo": "Habo",
+    "undo": "Rückgängig",
+    "editHabit": "Gewohnheit bearbeiten",
+    "habitNotificationsChannel": "Benachrichtigungskanal für Gewohnheitsbenachrichtigungen",
+    "firstDayOfWeek": "Erster Tag der Woche",
+    "emptyList": "Leere Liste",
+    "appNotifications": "App-Benachrichtigungen",
+    "cancel": "Abbrechen",
+    "showReward": "Belohnung anzeigen",
+    "habitNotifications": "Gewohnheitsbenachrichtigungen",
+    "statistics": "Statistiken",
+    "remainderOfReward": "Die Erinnerung an die Belohnung nach einer erfolgreichen Übung.",
+    "sourceCode": "Quellcode (GitHub)",
+    "appNotificationsChannel": "Benachrichtigungskanal für Anwendungsbenachrichtigungen",
+    "modify": "Ändern",
+    "routine": "Routine",
+    "check": "Prüfen",
+    "showMonthName": "Monatsname anzeigen",
+    "twoDayRule": "Zwei-Tage-Regel",
+    "week": "Woche",
+    "allow": "Erlauben",
+    "settings": "Einstellungen",
+    "reward": "Belohnung",
+    "backupFailedError": "FEHLER: Erstellen der Sicherung fehlgeschlagen.",
+    "disclaimer": "Haftungsausschluss",
+    "fifteenMinOfVideoGames": "15 Min. Videospiele",
+    "add": "Hinzufügen",
+    "copyright": "©2023 Habo",
+    "note": "Hinweis",
+    "done": "Fertig",
+    "observeYourProgress": "Beobachte deine Fortschritte",
+    "ifYouWantToSupport": "Wenn du Habo unterstützen möchtest, kannst du:",
+    "buyMeACoffee": "Kaufe mir einen Kaffee",
+    "dan": "Dan",
+    "fail": "Fehlgeschlagen",
+    "topStreak": "Top-Serie",
+    "currentStreak": "Aktuelle Serie",
+    "habitLoopDescription": "Habit Loop ist ein psychologisches Modell, das den Prozess der Gewohnheitsbildung beschreibt. Es besteht aus drei Komponenten: Signal, Routine und Belohnung. Das Signal löst die Routine (gewohnheitsmäßige Handlung) aus, die dann durch die Belohnung verstärkt wird. Dadurch entsteht eine Schleife, die die Gewohnheit verfestigt und die Wiederholungswahrscheinlichkeit erhöht.",
+    "cue": "Signal",
+    "cueDescription": "ist der Auslöser, der deine Gewohnheit auslöst. Dies kann eine bestimmte Zeit, ein bestimmter Ort, ein bestimmtes Gefühl oder ein bestimmtes Ereignis sein.",
+    "routineDescription": "ist die Aktion, die du als Reaktion auf das Signal ausführst. Dies ist die Gewohnheit selbst.",
+    "rewardDescription": "ist der Nutzen oder das positive Gefühl, das du nach der Durchführung der Routine verspürst. Es verstärkt die Gewohnheit.",
+    "twoDayRuleDescription": "Mit der Zwei-Tage-Regel kannst du einen Tag auslassen und verlierst keine Serie, wenn der nächste Tag erfolgreich ist.",
+    "advancedHabitBuildingDescription": "Dieser Abschnitt hilft dir, deine Gewohnheiten mithilfe der Gewohnheit schleife besser zu definieren. Du solltest für jede Gewohnheit Signale, Routinen und Belohnungen definieren.",
+    "habitContractDescription": "Obwohl positive Verstärkung empfohlen wird, entscheiden sich manche Menschen für einen Gewohnheitsvertrag. Ein Gewohnheitsvertrag ermöglicht es dir, eine Sanktion festzulegen, die verhängt wird, wenn du deine Gewohnheit nicht einhältst. Außerdem kann ein Verantwortlichkeitspartner hinzugezogen werden, der dich bei der Überwachung deiner Ziele unterstützt.",
+    "accountabilityPartner": "Verantwortlichkeitspartner",
+    "themeSelect": "{theme, select, device {Gerät} light {Hell} dark {Dunkel} oled {OLED  Schwarz} materialYou {Material You} other{Gerät}}",
+    "@themeSelect": {
+        "placeholders": {
+            "theme": {
+                "type": "String"
+            }
+        }
+    },
+    "defineYourHabitsDescription": "Um deine Gewohnheiten besser einzuhalten, kannst du Folgendes festlegen:",
+    "cueNumbered": "1. Signal",
+    "skipDoesNotAffectStreaks": "Überspringen (hat keinen Einfluss auf Serien)",
+    "trackYourProgress": "Du kannst deinen Fortschritt über die Kalenderansicht in jeder Gewohnheit oder auf der Statistikseite verfolgen.",
+    "backupCreatedSuccessfully": "Sicherung erfolgreich erstellt!",
+    "backupFailed": "Sicherung fehlgeschlagen!",
+    "restoreCompletedSuccessfully": "Wiederherstellung erfolgreich abgeschlossen!",
+    "restoreFailed": "Wiederherstellung fehlgeschlagen!",
+    "fileNotFound": "Datei nicht gefunden",
+    "fileTooLarge": "Datei zu groß (max. 10 MB)",
+    "invalidBackupFile": "Ungültige Sicherungsdatei",
+    "progress": "Fortschritt",
+    "enterAmount": "­Betrag eingeben",
+    "complete": "Vollständig",
+    "saveProgress": "Fortschritt speichern",
+    "currentProgress": "Aktuell: {current} {unit}",
+    "@currentProgress": {
+        "placeholders": {
+            "current": {
+                "type": "String"
+            },
+            "unit": {
+                "type": "String"
+            }
+        }
+    },
+    "targetProgress": "Ziel: {target} {unit}",
+    "@targetProgress": {
+        "placeholders": {
+            "target": {
+                "type": "String"
+            },
+            "unit": {
+                "type": "String"
+            }
+        }
+    },
+    "progressOf": "{current} / {target} {unit}",
+    "@progressOf": {
+        "placeholders": {
+            "current": {
+                "type": "String"
+            },
+            "target": {
+                "type": "String"
+            },
+            "unit": {
+                "type": "String"
+            }
+        }
+    },
+    "numericHabit": "Numerische Gewohnheit",
+    "targetValue": "Zielwert",
+    "partialValue": "Teilwert",
+    "unit": "Einheit",
+    "habitType": "Gewohnheitstyp",
+    "booleanHabit": "Boolesche Gewohnheit",
+    "slider": "Schieberegler",
+    "input": "Eingabe",
+    "numericHabitDescription": "Numerische Gewohnheiten ermöglichen es dir, den Fortschritt im Laufe des Tages schrittweise zu verfolgen.",
+    "partialValueDescription": "Um Fortschritte in kleineren Schritten zu verfolgen",
+    "categories": "Kategorien",
+    "addCategory": "Kategorie hinzufügen",
+    "editCategory": "Kategorie bearbeiten",
+    "category": "Kategorie",
+    "noCategoriesYet": "Noch keine Kategorien",
+    "createFirstCategory": "Erstelle deine erste Kategorie, um deine Gewohnheiten zu organisieren",
+    "pleaseEnterCategoryTitle": "Bitte gebe einen Kategorietitel ein",
+    "categoryAlreadyExists": "Kategorie „{title}“ existiert bereits",
+    "@categoryAlreadyExists": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "categoryCreatedSuccessfully": "Kategorie „{title}“ erfolgreich erstellt",
+    "@categoryCreatedSuccessfully": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "categoryUpdatedSuccessfully": "Kategorie „{title}“ erfolgreich aktualisiert",
+    "@categoryUpdatedSuccessfully": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "categoryDeletedSuccessfully": "Kategorie „{title}“ erfolgreich gelöscht",
+    "@categoryDeletedSuccessfully": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToSaveCategory": "Speichern der Kategorie fehlgeschlagen: {error}",
+    "@failedToSaveCategory": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToDeleteCategory": "Löschen der Kategorie fehlgeschlagen: {error}",
+    "@failedToDeleteCategory": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "selectCategories": "Kategorien auswählen",
+    "selectedCategories": "Ausgewählte Kategorien ({count})",
+    "@selectedCategories": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "allCategories": "Alle Kategorien",
+    "deleteCategory": "Kategorie löschen",
+    "deleteCategoryConfirmation": "Möchtest du „{title}” wirklich löschen?\n\nDadurch wird die Kategorie aus allen Gewohnheiten entfernt, die sie verwenden.",
+    "@deleteCategoryConfirmation": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "noHabitsInCategory": "Keine Gewohnheiten in „{title}“",
+    "@noHabitsInCategory": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "createHabitForCategory": "Erstelle eine Gewohnheit und ordne sie dieser Kategorie zu",
+    "showCategories": "Kategorien anzeigen",
+    "archive": "Archivieren",
+    "unarchive": "Wiederherstellen",
+    "archiveHabit": "Gewohnheit archivieren",
+    "unarchiveHabit": "Gewohnheit wiederherstellen",
+    "archivedHabits": "Archivierte Gewohnheiten",
+    "noArchivedHabits": "Keine archivierten Gewohnheiten",
+    "viewArchivedHabits": "Archivierte Gewohnheiten ansehen",
+    "habitArchived": "Gewohnheit archiviert",
+    "habitUnarchived": "Gewohnheit wiederhergestellt",
+    "biometric": "Biometrisch",
+    "biometricLockEnabled": "Biometrische Sperre aktiviert",
+    "biometricLockDisabled": "Biometrische Sperre deaktiviert",
+    "authenticationError": "Authentifizierungsfehler",
+    "biometricAuthenticationRequired": "Biometrische Authentifizierung erforderlich",
+    "setupFingerprintFaceUnlock": "Bitte richte die Entsperrung per Fingerabdruck oder Gesichtserkennung in den Geräteeinstellungen ein",
+    "touchSensor": "Berührungssensor",
+    "biometricNotRecognized": "Biometrische Daten nicht erkannt, bitte erneut versuchen",
+    "biometricRequired": "­Biometrische Daten erforderlich",
+    "biometricAuthenticationSucceeded": "Biometrische Authentifizierung erfolgreich",
+    "deviceCredentialsRequired": "Geräteanmeldedaten erforderlich",
+    "setupDeviceCredentials": "Bitte richte die Geräteanmeldedaten in den Einstellungen ein",
+    "setupTouchIdFaceId": "Bitte richte deine Touch ID oder Face ID in den Geräteeinstellungen ein",
+    "reenableTouchIdFaceId": "Bitte aktiviere deine Touch ID oder Face ID erneut",
+    "biometricLock": "Biometrische Sperre",
+    "biometricLockDescription": "Sichere App mit {authMethod}",
+    "@biometricLockDescription": {
+        "placeholders": {
+            "authMethod": {
+                "type": "String"
+            }
+        }
+    },
+    "authenticateToEnable": "Authentifizieren, um biometrische Sperre zu aktivieren",
+    "authenticateToAccess": "Bitte authentifizieren, um auf Habo zuzugreifen",
+    "authenticationRequired": "Authentifizierung erforderlich",
+    "authenticationFailedMessage": "Bitte authentifizieren, um mit {authMethod} auf Habo zuzugreifen",
+    "@authenticationFailedMessage": {
+        "placeholders": {
+            "authMethod": {
+                "type": "String"
+            }
+        }
+    },
+    "tryAgain": "Erneut versuchen",
+    "authenticating": "Authentifizierung läuft…",
+    "authenticate": "Authentifizieren",
+    "buildingBetterHabits": "Bessere Gewohnheiten Entwickeln",
+    "authenticationPrompt": "Bitte authentifiziere dich mit {authMethod}, um auf deine Gewohnheiten zuzugreifen",
+    "@authenticationPrompt": {
+        "placeholders": {
+            "authMethod": {
+                "type": "String"
+            }
+        }
+    },
+    "devicePinPatternPassword": "Geräte-PIN, Muster oder Passwort",
+    "fingerprint": "Fingerabdruck",
+    "iris": "Iris",
+    "whatsNewTitle": "Was ist Neu",
+    "whatsNewVersion": "Version {version}",
+    "@whatsNewVersion": {
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "featureNumericTitle": "Numerische Werte in Gewohnheiten",
+    "featureNumericDesc": "Verfolge Dinge wie Gläser Wasser oder gelesene Seiten",
+    "featureDeepLinksTitle": "URL-Schema (Deep Links)",
+    "featureDeepLinksDesc": "Öffne Habo direkt auf Bildschirmen wie Einstellungen oder erstellen",
+    "featureCategoriesTitle": "Kategorien",
+    "featureCategoriesDesc": "Organisiere Gewohnheiten mit Kategoriefiltern",
+    "featureArchiveTitle": "Archivieren",
+    "featureArchiveDesc": "Verstecke Gewohnheiten, die du nicht mehr verfolgst, ohne sie zu löschen",
+    "featureMaterialYouTitle": "Material You-Thema (Android)",
+    "featureMaterialYouDesc": "Dynamische Farben, die zu deinem Geräte-Hintergrund passen",
+    "featureSoundTitle": "Neue Sound-Engine",
+    "featureSoundDesc": "Einstellbare Lautstärke",
+    "featureLockTitle": "Sperrfunktion",
+    "featureLockDesc": "Sichern Sie die App mit Face ID / Touch ID / Biometrie",
+    "haboSyncComingSoon": "Demnächst",
+    "haboSyncDescription": "Synchronisiere deine Gewohnheiten auf allen deinen Geräten mit Habo's End-to-End-verschlüsseltem Cloud-Dienst.",
+    "haboSyncLearnMore": "Weitere Informationen unter habo.space/sync",
+    "or": "oder"
+}

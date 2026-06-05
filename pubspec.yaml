@@ -1,0 +1,112 @@
+name: habo
+description: Minimalistic habit tracker.
+
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+version: 3.1.2+5115
+
+environment:
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: ">=3.41.1"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^8.0.0
+  provider: ^6.0.5
+  shared_preferences: ^2.2.0
+  table_calendar: ^3.2.0
+  awesome_dialog: ^3.1.0
+  loader_overlay: ^5.0.0
+  introduction_screen: ^4.0.0
+  flutter_svg: ^2.0.7
+  url_launcher: ^6.1.12
+  package_info_plus: ^9.0.0
+  sqflite: ^2.3.0
+  sqflite_common_ffi: ^2.3.0+2
+  path: ^1.8.3
+  fl_chart: ^1.0.0
+  flutter_file_dialog: ^3.0.2
+  file_picker: ^10.2.0
+  path_provider: ^2.1.0
+  awesome_notifications: ^0.11.0
+  timezone: ^0.11.0
+  flutter_colorpicker: ^1.0.3
+  flutter_launcher_icons: ^0.14.4
+  window_manager: ^0.5.1
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  intl_utils: ^2.8.11
+  dynamic_color: ^1.7.0
+  percent_indicator: ^4.2.5
+  flutter_native_splash: ^2.4.4
+  flutter_iconpicker: ^4.0.1
+  flutter_soloud: ^3.2.5
+  audio_session: ^0.2.0
+  local_auth: ^3.0.0
+  home_widget: ^0.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  build_runner: ^2.4.9
+
+  flutter_lints: ^6.0.0
+
+# For now mipmaps are used.
+flutter_icons:
+  image_path_android: "assets/images/icon.png"
+  image_path_ios: "assets/images/ios_icon.jpg"
+  adaptive_icon_foreground: "assets/images/android_foreground.png"
+  adaptive_icon_background: "#FFFFFF"
+  min_sdk_android: 21
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  macos:
+    generate: true
+    image_path: "assets/images/macos_icon.png"
+
+flutter:
+  uses-material-design: true
+  generate: true
+
+  assets:
+    - assets/
+    - assets/images/
+    - assets/images/onboard/
+    - assets/sounds/
+    - assets/google_fonts/
+
+flutter_intl:
+  enabled: true
+
+# Native splash screen configuration
+flutter_native_splash:
+  # Match app's light and dark scaffold background colors
+  color: "#FAFAFA" # from HaboTheme.lightTheme.scaffoldBackgroundColor (0xFFFAFAFA)
+  color_dark: "#000000" # from HaboTheme.darkTheme.scaffoldBackgroundColor (0xFF000000)
+
+  # Use existing app icon as splash image
+  image: assets/images/splash_icon.png
+  image_dark: assets/images/splash_icon.png
+
+  # Improve appearance
+  ios_content_mode: center # make image larger on iOS
+  android_gravity: center # explicit default
+  fullscreen: false # hide status bar during splash
+
+  # Android 12 requires its own config
+  android_12:
+    color: "#FAFAFA"
+    color_dark: "#000000"
+    icon_background_color: "#FAFAFA" # match background to reduce visible circle
+    icon_background_color_dark: "#000000"
+    image: assets/images/splash_icon.png
+    image_dark: assets/images/splash_icon.png
+
+  android: true
+  ios: true
+  web: false

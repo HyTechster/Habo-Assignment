@@ -1,0 +1,345 @@
+{
+    "backup": "Резервна копія",
+    "habo": "Habo",
+    "congratulationsReward": "Вітаємо! Твоя нагорода:",
+    "habitLoopDescription": "Цикл звички – це психологічна модель, що описує процес формування звички. Вона складається з трьох компонентів: сигнал, рутина та винагорода. Сигнал запускає рутину (дії, які ви хочете зробити звичкою), яка потім підкріплюється винагородою, створюючи цикл, що робить звичку більш укоріненою та схильною до повторення.",
+    "rewardDescription": "це користь або позитивне відчуття, яке ви відчуваєте після виконання рутини. Це закріплює звичку.",
+    "habitContractDescription": "Хоча рекомендується позитивне підкріплення, деякі люди можуть обрати договір про звичку. Договір про звичку дозволяє вам вказати покарання, які будуть застосовані, якщо ви пропустите свою звичку, також ви може залучити партнера, який допоможе контролювати досягнення ваших цілей.",
+    "haboNeedsPermission": "Для коректної роботи Habo потрібен дозвіл на надсилання повідомлень.",
+    "note": "Нотатки",
+    "restoreFailedError": "Помилка: відновлення з резервної копії не вдалося.",
+    "habitDeleted": "Звичку видалено.",
+    "doNotForgetToCheckYourHabits": "Не забудьте перевірити свої звички.",
+    "habitNotificationsChannel": "Канал сповіщень для повідомлень про звички",
+    "appNotificationsChannel": "Канал сповіщень для повідомлень про застосунок",
+    "appNotifications": "Повідомлення про застосунок",
+    "routineNumbered": "2. Рутину",
+    "habits": "Звички:",
+    "statistics": "Статистика",
+    "emptyList": "Порожній список",
+    "noDataAboutHabits": "Даних про звички немає.",
+    "currentStreak": "Поточний рекорд",
+    "topStreak": "Найкращий рекорд",
+    "total": "Загалом",
+    "unknown": "Невідомо",
+    "warning": "Попередження",
+    "allHabitsWillBeReplaced": "Всі звички будуть замінені звичками з резервної копії.",
+    "restore": "Відновити",
+    "cancel": "Скасувати",
+    "settings": "Налаштування",
+    "theme": "Тема",
+    "firstDayOfWeek": "Перший день тижня",
+    "notifications": "Повідомлення",
+    "notificationTime": "Час повідомлення",
+    "soundEffects": "Звукові ефекти",
+    "showMonthName": "Показувати назву місяця",
+    "setColors": "Змінити кольори",
+    "create": "Створити",
+    "onboarding": "Навчальний посібник",
+    "about": "Про застосунок",
+    "copyright": "©2023 Habo",
+    "termsAndConditions": "Умови та положення",
+    "privacyPolicy": "Політика конфіденційності",
+    "disclaimer": "Застереження",
+    "sourceCode": "Вихідний код (GitHub)",
+    "ifYouWantToSupport": "Якщо ви хочете підтримати Habo, ви можете:",
+    "buyMeACoffee": "Пригостити мене кавою",
+    "reset": "Скинути",
+    "done": "Завершити",
+    "ohNoSanction": "Ой лишенько! Ваше покарання:",
+    "month": "Місяць",
+    "week": "Тиждень",
+    "habitLoop": "Цикл звички",
+    "cue": "Сигнал",
+    "cueDescription": "це тригер, який запускає вашу звичку. Це може бути певний час, місце, відчуття або подія.",
+    "routine": "Рутина",
+    "routineDescription": "це дія, яку ви робите у відповідь на сигнал. Це сама звичка.",
+    "reward": "Винагорода",
+    "editHabit": "Редагувати звичку",
+    "createHabit": "Створити звичку",
+    "delete": "Видалити",
+    "habitTitleEmptyError": "Назва звички не може бути порожньою.",
+    "save": "Зберегти",
+    "exercise": "Вправа",
+    "habit": "Звичка",
+    "useTwoDayRule": "Використовувати правило двох днів",
+    "twoDayRule": "Правило двох днів",
+    "twoDayRuleDescription": "З правилом двох днів ви можете пропустити один день та не втратити рекорд, якщо наступний день буде успішним.",
+    "advancedHabitBuilding": "Розширене будування звички",
+    "advancedHabitBuildingDescription": "Цей розділ допоможе вам краще визначити свої звички за допомогою циклу звички. Для кожної звички ви маєте визначити сигнал, рутину та винагороду.",
+    "at7AM": "О 7:00 ранку",
+    "do50PushUps": "Виконати 50 віджимань",
+    "fifteenMinOfVideoGames": "15 хвилин у відеоіграх",
+    "remainderOfReward": "Нагадувати про винагороду після успішної рутини.",
+    "habitContract": "Договір про звичку",
+    "showReward": "Показувати винагороду",
+    "donateToCharity": "Пожертвувати 400₴ на благодійність",
+    "sanction": "Покарання",
+    "showSanction": "Показувати покаранння",
+    "remainderOfSanction": "Нагадування про покарання після невдалої рутини.",
+    "dan": "Денис",
+    "accountabilityPartner": "Партнер по відповідальності",
+    "add": "Додати",
+    "allow": "Дозволити",
+    "date": "Дата",
+    "check": "Перевірити",
+    "fail": "Невдача",
+    "skip": "Пропустити",
+    "yourCommentHere": "Ваші нотатки тут",
+    "close": "Закрити",
+    "createYourFirstHabit": "Створіть вашу першу звичку.",
+    "modify": "Змінити",
+    "backupFailedError": "Помилка: не вдалося створити резервну копію.",
+    "undo": "Відмінити",
+    "habitNotifications": "Повідомлення про звички",
+    "themeSelect": "{theme, select, device {Пристрій} light {Світло} dark {Темний} oled {OLED чорний} materialYou {Material You} other{Пристрій}}",
+    "@themeSelect": {
+        "placeholders": {
+            "theme": {
+                "type": "String"
+            }
+        }
+    },
+    "defineYourHabits": "Визначте свої звички",
+    "defineYourHabitsDescription": "Щоб краще дотримуватися своїх звичок, ви можете визначити:",
+    "cueNumbered": "1. Сигнал",
+    "rewardNumbered": "3. Винагороду",
+    "logYourDays": "Відстежуйте свої дні",
+    "successful": "Успішні",
+    "notSoSuccessful": "Не такі успішні",
+    "skipDoesNotAffectStreaks": "Пропущені (не впливає на рекорд)",
+    "observeYourProgress": "Спостерігайте за своїм прогресом",
+    "trackYourProgress": "Ви можете відстежувати свій прогрес через календар у кожній звичці або на сторінці статистики.",
+    "backupCreatedSuccessfully": "Резервна копія успішно створена!",
+    "backupFailed": "Не вдалося створити резервну копію!",
+    "restoreCompletedSuccessfully": "Відновлення успішно завершено!",
+    "restoreFailed": "Відновлення не вдалося!",
+    "fileNotFound": "Файл не знайдено",
+    "fileTooLarge": "Файл занадто великий (максимум 10 МБ)",
+    "invalidBackupFile": "Недійсний файл резервної копії",
+    "progress": "Прогрес",
+    "enterAmount": "Введіть суму",
+    "complete": "Завершено",
+    "saveProgress": "Зберегти прогрес",
+    "currentProgress": "Поточний: {current} {unit}",
+    "@currentProgress": {
+        "placeholders": {
+            "current": {
+                "type": "String"
+            },
+            "unit": {
+                "type": "String"
+            }
+        }
+    },
+    "targetProgress": "Ціль: {target} {unit}",
+    "@targetProgress": {
+        "placeholders": {
+            "target": {
+                "type": "String"
+            },
+            "unit": {
+                "type": "String"
+            }
+        }
+    },
+    "progressOf": "{current} / {target} {unit}",
+    "@progressOf": {
+        "placeholders": {
+            "current": {
+                "type": "String"
+            },
+            "target": {
+                "type": "String"
+            },
+            "unit": {
+                "type": "String"
+            }
+        }
+    },
+    "numericHabit": "Числова звичка",
+    "targetValue": "Цільове значення",
+    "partialValue": "Часткове значення",
+    "unit": "Одиниця",
+    "habitType": "Тип звички",
+    "booleanHabit": "Булева звичка",
+    "slider": "Слайдер",
+    "input": "Вхід",
+    "numericHabitDescription": "Числові звички дозволяють вам відстежувати прогрес поступово протягом дня.",
+    "partialValueDescription": "Відстежувати прогрес меншими кроками",
+    "categories": "Категорії",
+    "addCategory": "Додати категорію",
+    "editCategory": "Редагувати категорію",
+    "category": "Категорія",
+    "noCategoriesYet": "Поки що немає категорій",
+    "createFirstCategory": "Створіть свою першу категорію для впорядкування своїх звичок",
+    "pleaseEnterCategoryTitle": "Будь ласка, введіть назву категорії",
+    "categoryAlreadyExists": "Категорія \"{title}\" вже існує",
+    "@categoryAlreadyExists": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "categoryCreatedSuccessfully": "Категорію \"{title}\" успішно створено",
+    "@categoryCreatedSuccessfully": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "categoryUpdatedSuccessfully": "Категорію \"{title}\" успішно оновлено",
+    "@categoryUpdatedSuccessfully": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "categoryDeletedSuccessfully": "Категорію \"{title}\" успішно видалено",
+    "@categoryDeletedSuccessfully": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToSaveCategory": "Не вдалося зберегти категорію: {error}",
+    "@failedToSaveCategory": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToDeleteCategory": "Не вдалося видалити категорію: {error}",
+    "@failedToDeleteCategory": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "selectCategories": "Виберіть категорії",
+    "selectedCategories": "Вибрані категорії ({count})",
+    "@selectedCategories": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "allCategories": "Усі категорії",
+    "deleteCategory": "Видалити категорію",
+    "deleteCategoryConfirmation": "Ви впевнені, що хочете видалити \"{title}\"?\n\nЦе видалить категорію з усіх звичок, які її використовують.",
+    "@deleteCategoryConfirmation": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "noHabitsInCategory": "Немає звичок у \"{title}\"",
+    "@noHabitsInCategory": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "createHabitForCategory": "Створіть звичку та віднесіть її до цієї категорії",
+    "showCategories": "Показати категорії",
+    "archive": "Архів",
+    "unarchive": "Розархівувати",
+    "archiveHabit": "Звичка архівувати",
+    "unarchiveHabit": "Звичка розархівування",
+    "archivedHabits": "Архівні звички",
+    "noArchivedHabits": "Немає архівованих звичок",
+    "viewArchivedHabits": "Переглянути архівовані звички",
+    "habitArchived": "Звичку архівовано",
+    "habitUnarchived": "Звичку розархівовано",
+    "biometric": "Біометричний",
+    "biometricLockEnabled": "Біометричний замок увімкнено",
+    "biometricLockDisabled": "Біометричний замок вимкнено",
+    "authenticationError": "Помилка автентифікації",
+    "biometricAuthenticationRequired": "Потрібна біометрична автентифікація",
+    "setupFingerprintFaceUnlock": "Будь ласка, налаштуйте розблокування відбитком пальця або обличчям у налаштуваннях пристрою",
+    "touchSensor": "Сенсорний датчик",
+    "biometricNotRecognized": "Біометричні дані не розпізнано, спробуйте ще раз",
+    "biometricRequired": "Необхідні біометричні дані",
+    "biometricAuthenticationSucceeded": "Біометрична автентифікація успішна",
+    "deviceCredentialsRequired": "Потрібні облікові дані пристрою",
+    "setupDeviceCredentials": "Будь ласка, налаштуйте облікові дані пристрою в налаштуваннях",
+    "setupTouchIdFaceId": "Будь ласка, налаштуйте Touch ID або Face ID у налаштуваннях пристрою",
+    "reenableTouchIdFaceId": "Будь ласка, знову ввімкніть Touch ID або Face ID",
+    "biometricLock": "Біометричний замок",
+    "biometricLockDescription": "Безпечний додаток з {authMethod}",
+    "@biometricLockDescription": {
+        "placeholders": {
+            "authMethod": {
+                "type": "String"
+            }
+        }
+    },
+    "authenticateToEnable": "Автентифікація для активації біометричного блокування",
+    "authenticateToAccess": "Будь ласка, пройдіть автентифікацію для доступу до Habo",
+    "authenticationRequired": "Потрібна автентифікація",
+    "authenticationFailedMessage": "Будь ласка, пройдіть автентифікацію, щоб отримати доступ до Habo за допомогою {authMethod}",
+    "@authenticationFailedMessage": {
+        "placeholders": {
+            "authMethod": {
+                "type": "String"
+            }
+        }
+    },
+    "tryAgain": "Спробуйте ще раз",
+    "authenticating": "Автентифікація…",
+    "authenticate": "Автентифікація",
+    "buildingBetterHabits": "Формування кращих звичок",
+    "authenticationPrompt": "Будь ласка, пройдіть автентифікацію за допомогою {authMethod}, щоб отримати доступ до своїх звичок",
+    "@authenticationPrompt": {
+        "placeholders": {
+            "authMethod": {
+                "type": "String"
+            }
+        }
+    },
+    "devicePinPatternPassword": "PIN-код, графічний ключ або пароль пристрою",
+    "fingerprint": "Відбиток пальця",
+    "iris": "Ірис",
+    "whatsNewTitle": "Що нового",
+    "whatsNewVersion": "Версія {version}",
+    "@whatsNewVersion": {
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "featureNumericTitle": "Числові значення у звичках",
+    "featureNumericDesc": "Кількість відстежень, як-от склянки води або прочитані сторінки",
+    "featureDeepLinksTitle": "Схема URL-адрес (глибокі посилання)",
+    "featureDeepLinksDesc": "Відкрийте Habo безпосередньо на таких екранах, як налаштування або створення",
+    "featureCategoriesTitle": "Категорії",
+    "featureCategoriesDesc": "Упорядкуйте звички за допомогою фільтрів категорій",
+    "featureArchiveTitle": "Архів",
+    "featureArchiveDesc": "Приховуйте звички, які ви більше не відстежуєте, без видалення",
+    "featureMaterialYouTitle": "Тема Material You (Android)",
+    "featureMaterialYouDesc": "Динамічні кольори, що пасують до ваших шпалер",
+    "featureSoundTitle": "Новий звуковий двигун",
+    "featureSoundDesc": "Регульована гучність",
+    "featureLockTitle": "Функція блокування",
+    "featureLockDesc": "Захистіть додаток за допомогою Face ID / Touch ID / біометрії",
+    "haboSyncComingSoon": "Скоро буде",
+    "haboSyncDescription": "Синхронізуйте свої звички на всіх пристроях за допомогою хмарного сервісу Habo з наскрізним шифруванням.",
+    "haboSyncLearnMore": "Дізнайтеся більше на habo.space/sync",
+    "featureIosSoundMixingTitle": "Виправлено мікшування звуку",
+    "featureIosSoundMixingDesc": "Звуки Habo більше не переривають вашу музику чи подкасти",
+    "featureHomescreenWidgetTitle": "Віджет головного екрана",
+    "featureHomescreenWidgetDesc": "Переглядайте прогрес у виконанні своїх звичок одним поглядом з головного екрана (експериментально)",
+    "featureLongpressCheckTitle": "Перевірка тривалого натискання",
+    "featureLongpressCheckDesc": "Тривале натискання на звичні кнопки для швидкої зміни статусу",
+    "habitsToday": "Звички сьогодні"
+}

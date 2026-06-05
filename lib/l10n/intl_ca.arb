@@ -1,0 +1,338 @@
+{
+    "habits": "Hàbits:",
+    "statistics": "Estadístiques",
+    "emptyList": "Llista buida",
+    "topStreak": "La millor ratxa",
+    "currentStreak": "Ratxa actual",
+    "total": "Total",
+    "unknown": "Desconegut",
+    "warning": "Avís",
+    "allHabitsWillBeReplaced": "Tots els hàbits seran substituïts pels de la còpia de seguretat.",
+    "settings": "Paràmetres",
+    "theme": "Tema",
+    "restore": "Restaura",
+    "cancel": "Cancel·la",
+    "soundEffects": "Efectes de so",
+    "backup": "Còpia de seguretat",
+    "about": "Quant a",
+    "showMonthName": "Mostra el nom del mes",
+    "create": "Crea",
+    "setColors": "Canvia els colors",
+    "onboarding": "Guia inicial",
+    "termsAndConditions": "Condicions generals",
+    "privacyPolicy": "Política de privacitat",
+    "disclaimer": "Exempció de responsabilitat",
+    "sourceCode": "Codi font (GitHub)",
+    "ifYouWantToSupport": "Si vols donar suport a Habo, pots:",
+    "congratulationsReward": "Enhorabona! La teva recompensa:",
+    "ohNoSanction": "Oh no! La teva sanció:",
+    "month": "Mes",
+    "week": "Setmana",
+    "habitLoop": "Cicle de l'hàbit",
+    "cueDescription": "és el desencadenant que inicia l'hàbit. Pot ser un moment, lloc, sentiment o event concret.",
+    "routine": "Rutina",
+    "cue": "Senyal",
+    "reward": "Gratificació",
+    "rewardDescription": "és el benefici o sentiment positiu que s'experimenta un cop duta a terme la rutina. Reforça l'hàbit.",
+    "habitTitleEmptyError": "El títol de l'hàbit no pot ser buit.",
+    "save": "Desa",
+    "habit": "Hàbit",
+    "editHabit": "Edita l'hàbit",
+    "delete": "Elimina",
+    "useTwoDayRule": "Utilitza la regla dels dos dies",
+    "routineDescription": "és l'acció que es duu a terme en resposta al senyal. Això és l'hàbit en si mateix.",
+    "twoDayRule": "Regla dels dos dies",
+    "advancedHabitBuilding": "Creació avançada d'hàbits",
+    "at7AM": "A les 7:00",
+    "fifteenMinOfVideoGames": "15 min. de videojocs",
+    "habitContract": "Clàusules de l'hàbit",
+    "showReward": "Mostra la gratificació",
+    "remainderOfReward": "El recordatori de la gratificació desprès de dur a terme una rutina amb èxit.",
+    "donateToCharity": "Fer una donació de 10€ a una organització benèfica",
+    "sanction": "Sanció",
+    "dan": "Dan",
+    "accountabilityPartner": "Persona responsable",
+    "remainderOfSanction": "El recordatori de la sanció quan no es completa amb èxit una rutina.",
+    "haboNeedsPermission": "Habo necessita permís per enviar notificacions per funcionar correctament.",
+    "allow": "Permet",
+    "date": "Data",
+    "fail": "Fracàs",
+    "skip": "Salta",
+    "note": "Nota",
+    "close": "Tanca",
+    "createYourFirstHabit": "Crea el teu primer hàbit.",
+    "restoreFailedError": "ERROR: La restauració de la còpia de seguretat ha fallat.",
+    "habitDeleted": "Hàbit eliminat.",
+    "appNotifications": "Notificacions de l'aplicació",
+    "habitNotifications": "Notificacions dels hàbits",
+    "habitNotificationsChannel": "Forma de notificació per les notificacions d'hàbits",
+    "appNotificationsChannel": "Forma de notificació per les notificacions de l'aplicació",
+    "doNotForgetToCheckYourHabits": "No oblidis revisar els teus hàbits.",
+    "add": "Afegeix",
+    "check": "Comprova",
+    "yourCommentHere": "Escriu el teu comentari aquí",
+    "themeSelect": "{theme, select, device {Dispositiu} light {Clar} dark {Fosc} oled {Negre pur (OLED)} materialYou {Material You} other{Dispositiu}}",
+    "@themeSelect": {
+        "placeholders": {
+            "theme": {
+                "type": "String"
+            }
+        }
+    },
+    "defineYourHabitsDescription": "Per cenyir-te millor als teus hàbits, pots definir:",
+    "logYourDays": "Porta un registre diari",
+    "cueNumbered": "1. Senyal",
+    "routineNumbered": "2. Rutina",
+    "skipDoesNotAffectStreaks": "Salta (no afecta la ratxa)",
+    "trackYourProgress": "Pots fer un seguiment del teu progrés a través de la vista de calendari per cada hàbit o a la pàgina d'estadístiques.",
+    "noDataAboutHabits": "No hi ha dades sobre els hàbits.",
+    "notificationTime": "Horari de la notificació",
+    "firstDayOfWeek": "Primer dia de la setmana",
+    "notifications": "Notificacions",
+    "habo": "Habo",
+    "copyright": "©2023 Habo",
+    "buyMeACoffee": "Convida'm a un cafè",
+    "reset": "Restableix",
+    "done": "Fet",
+    "createHabit": "Crea un hàbit",
+    "exercise": "Fer exercici",
+    "advancedHabitBuildingDescription": "Aquesta secció t'ajuda a definir millor els hàbits utilitzant el cicle de l'hàbit. Has de definir senyals, rutines i gratificacions per cada hàbit.",
+    "do50PushUps": "Fer 50 flexions",
+    "twoDayRuleDescription": "Amb la regla dels dos dies, es pot perdre un dia sense perdre la ratxa, sempre que el següent dia la completis amb èxit.",
+    "habitContractDescription": "Tot i que es recomana el reforçament positiu, algunes persones poden optar per una clàusula d'incompliment de l'hàbit. Això permet estipular la sanció a imposar-te si no compleixes amb l'hàbit. A més a més, pots demanar l'ajuda d'una persona responsable que t'ajudi a supervisar els objectius.",
+    "showSanction": "Mostra la sanció",
+    "modify": "Modifica",
+    "backupFailedError": "ERROR: La creació de la còpia de seguretat ha fallat.",
+    "defineYourHabits": "Defineix els teus hàbits",
+    "rewardNumbered": "3. Gratificació",
+    "successful": "Completat amb èxit",
+    "notSoSuccessful": "No completat amb èxit",
+    "observeYourProgress": "Observa el teu progrés",
+    "habitLoopDescription": "El cicle de l'hàbit (Habit loop) és un model psicològic que descriu el procés de formació dels hàbits. Es conforma per tres components: Senyal, Rutina i Gratificació. El Senyal dona lloc a la Rutina (l'acció habitual), i aquesta és reforçada per la Gratificació. Això resulta en un cicle que fa que l'hàbit s'arreli i sigui més probable que el repeteixis.",
+    "undo": "Desfés",
+    "backupCreatedSuccessfully": "Còpia de seguretat creada amb èxit!",
+    "backupFailed": "Còpia de seguretat fallida!",
+    "restoreCompletedSuccessfully": "Restauració completada amb èxit!",
+    "restoreFailed": "Restauració fallida!",
+    "fileNotFound": "No s'ha trobat l'arxiu",
+    "fileTooLarge": "L'arxiu és massa gran (màxim 10MB)",
+    "invalidBackupFile": "Fitxer de còpia de seguretat invàlid",
+    "progress": "Progrés",
+    "enterAmount": "Introdueix quantitat",
+    "complete": "Completar",
+    "saveProgress": "Desar progrés",
+    "currentProgress": "Actual: {current} {unit}",
+    "@currentProgress": {
+        "placeholders": {
+            "current": {
+                "type": "String"
+            },
+            "unit": {
+                "type": "String"
+            }
+        }
+    },
+    "targetProgress": "Objectiu: {target} {unit}",
+    "@targetProgress": {
+        "placeholders": {
+            "target": {
+                "type": "String"
+            },
+            "unit": {
+                "type": "String"
+            }
+        }
+    },
+    "progressOf": "{current} / {target} {unit}",
+    "@progressOf": {
+        "placeholders": {
+            "current": {
+                "type": "String"
+            },
+            "target": {
+                "type": "String"
+            },
+            "unit": {
+                "type": "String"
+            }
+        }
+    },
+    "numericHabit": "Hàbit numèric",
+    "targetValue": "Valor objectiu",
+    "partialValue": "Valor parcial",
+    "unit": "Unitat",
+    "habitType": "Tipus d'hàbit",
+    "booleanHabit": "Hàbit booleà (Fet/No fet)",
+    "slider": "Selector",
+    "input": "Entrada",
+    "numericHabitDescription": "Els hàbits numèrics et permeten monitorar el progrés en increments durant el dia.",
+    "partialValueDescription": "Per monitorar el progrés en increments més petits",
+    "categories": "Categories",
+    "addCategory": "Afegeix Categoria",
+    "editCategory": "Editar Categoria",
+    "category": "Categoria",
+    "noCategoriesYet": "Encara no hi ha cap categoria",
+    "createFirstCategory": "Crea la primera categoria per organitzar els teus hàbits",
+    "pleaseEnterCategoryTitle": "Si us plau, afegeix un títol de categoria",
+    "categoryAlreadyExists": "La categoria \"{title}\" ja existeix",
+    "@categoryAlreadyExists": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "categoryCreatedSuccessfully": "Categoria \"{title}\" creada amb èxit",
+    "@categoryCreatedSuccessfully": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "categoryUpdatedSuccessfully": "Categoria \"{title}\" actualitzada amb èxit",
+    "@categoryUpdatedSuccessfully": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "categoryDeletedSuccessfully": "Categoria \"{title}\" eliminada amb èxit",
+    "@categoryDeletedSuccessfully": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToSaveCategory": "Error en desar la categoria: {error}",
+    "@failedToSaveCategory": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "failedToDeleteCategory": "Error en eliminar la categoria: {error}",
+    "@failedToDeleteCategory": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "selectCategories": "Selecciona Categories",
+    "selectedCategories": "Categories Seleccionades ({count})",
+    "@selectedCategories": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "allCategories": "Totes les categories",
+    "deleteCategory": "Elimina Categoria",
+    "deleteCategoryConfirmation": "Vols eliminar \"{title}\"?\n\nAixò suprimirà la categoria de tots els hàbits associats.",
+    "@deleteCategoryConfirmation": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "noHabitsInCategory": "No hi ha cap hàbit a \"{title}\"",
+    "@noHabitsInCategory": {
+        "placeholders": {
+            "title": {
+                "type": "String"
+            }
+        }
+    },
+    "createHabitForCategory": "Crea un hàbit i assigna'l aquesta categoria",
+    "showCategories": "Mostra Categories",
+    "archive": "Arxiva",
+    "unarchive": "Desarxiva",
+    "archiveHabit": "Arxiva l'hàbit",
+    "unarchiveHabit": "Desarxiva l'hàbit",
+    "archivedHabits": "Hàbits Arxivats",
+    "noArchivedHabits": "No hi ha cap hàbit arxivat",
+    "viewArchivedHabits": "Mostra hàbits arxivats",
+    "habitArchived": "Hàbit arxivat",
+    "habitUnarchived": "Hàbit desarxivat",
+    "biometric": "Biomètrica",
+    "biometricLockEnabled": "Bloqueig biomètric activat",
+    "biometricLockDisabled": "Bloqueig biomètric desactivat",
+    "authenticationError": "Error d'autenticació",
+    "biometricAuthenticationRequired": "Autenticació biomètrica requerida",
+    "setupFingerprintFaceUnlock": "Si us plau, configura el desbloqueig facial o per empremta a la configuració del dispositiu",
+    "touchSensor": "Sensor d'empremta",
+    "biometricNotRecognized": "No s'han reconegut les dades biomètriques, torna a intentar-ho",
+    "biometricRequired": "Biomètrica requerida",
+    "biometricAuthenticationSucceeded": "Autenticació biomètrica amb èxit",
+    "deviceCredentialsRequired": "Es requereixen les credencials del dispositiu",
+    "setupDeviceCredentials": "Si us plau, configura les credencials del dispositiu a la configuració",
+    "setupTouchIdFaceId": "Si us plau, configura el Touch ID o Face ID a la configuració del dispositiu",
+    "reenableTouchIdFaceId": "Si us plau, torna a activar el Touch ID o Face ID",
+    "biometricLock": "Bloqueig Biomètric",
+    "biometricLockDescription": "Protegeix l'app amb {authMethod}",
+    "@biometricLockDescription": {
+        "placeholders": {
+            "authMethod": {
+                "type": "String"
+            }
+        }
+    },
+    "authenticateToEnable": "Autentica't per activar el bloqueig biomètric",
+    "authenticateToAccess": "Si us plau, autentica't per accedir a Habo",
+    "authenticationRequired": "Autenticació requerida",
+    "authenticationFailedMessage": "Si us plau, autentica't amb {authMethod} per accedir a Habo",
+    "@authenticationFailedMessage": {
+        "placeholders": {
+            "authMethod": {
+                "type": "String"
+            }
+        }
+    },
+    "tryAgain": "Torna a intentar-ho",
+    "authenticating": "Autenticant…",
+    "authenticate": "Autenticar",
+    "buildingBetterHabits": "Construint Millors Hàbits",
+    "authenticationPrompt": "Si us plau, autenticat amb {authMethod} per accedir als teus hàbits",
+    "@authenticationPrompt": {
+        "placeholders": {
+            "authMethod": {
+                "type": "String"
+            }
+        }
+    },
+    "devicePinPatternPassword": "PIN, Patrò o Contrasenya del dispositiu",
+    "fingerprint": "Empremta",
+    "iris": "Iris",
+    "whatsNewTitle": "Novetats",
+    "whatsNewVersion": "Versió {version}",
+    "@whatsNewVersion": {
+        "placeholders": {
+            "version": {
+                "type": "String"
+            }
+        }
+    },
+    "featureNumericTitle": "Valors numèrics als hàbits",
+    "featureNumericDesc": "Fes un seguiment de comptadors (per exemple gots d'aigua beguts o pàgines llegides)",
+    "featureDeepLinksTitle": "Esquema d'URL (deep links)",
+    "featureDeepLinksDesc": "Obre pantalles de Habo directament (com la de configuració o la de crear)",
+    "featureCategoriesTitle": "Categories",
+    "featureCategoriesDesc": "Organitza els hàbits amb filtres de categoria",
+    "featureArchiveTitle": "Arxiu",
+    "featureArchiveDesc": "Amaga hàbits que ja no segueixes sense eliminar-los",
+    "featureMaterialYouTitle": "Tema Material You (Android)",
+    "featureMaterialYouDesc": "Colors dinàmics basats en el teu fons de pantalla",
+    "featureSoundTitle": "Nou motor de so",
+    "featureSoundDesc": "Volum ajustable",
+    "featureLockTitle": "Funció de bloqueig",
+    "featureLockDesc": "Protegeix l'app amb Face ID / Touch ID/ bloqueig biomètric",
+    "haboSyncComingSoon": "Properament",
+    "haboSyncDescription": "Sincronitza els hàbits entre tots els teus dispositius amb el servei de núvol de Habo, encriptat d'extrem-a-extrem.",
+    "haboSyncLearnMore": "Més informació a habo.space/sync"
+}
