@@ -1926,6 +1926,191 @@ class S {
   String get searchIcons {
     return Intl.message('Search', name: 'searchIcons', desc: '', args: []);
   }
+
+  /// `Less`
+  String get heatmapLegendLess {
+    return Intl.message(
+      'Less',
+      name: 'heatmapLegendLess',
+      desc: 'Heatmap legend label for the lower end of the activity scale',
+      args: [],
+    );
+  }
+
+  /// `More`
+  String get heatmapLegendMore {
+    return Intl.message(
+      'More',
+      name: 'heatmapLegendMore',
+      desc: 'Heatmap legend label for the upper end of the activity scale',
+      args: [],
+    );
+  }
+
+  /// `No data`
+  String get heatmapLevelNoData {
+    return Intl.message(
+      'No data',
+      name: 'heatmapLevelNoData',
+      desc: 'Heatmap tap tooltip: no event was logged for this day',
+      args: [],
+    );
+  }
+
+  /// `Skipped`
+  String get heatmapLevelSkipped {
+    return Intl.message(
+      'Skipped',
+      name: 'heatmapLevelSkipped',
+      desc: 'Heatmap tap tooltip: habit was skipped on this day',
+      args: [],
+    );
+  }
+
+  /// `Failed / Partial`
+  String get heatmapLevelFailed {
+    return Intl.message(
+      'Failed / Partial',
+      name: 'heatmapLevelFailed',
+      desc:
+          'Heatmap tap tooltip: habit was failed or only partially completed on this day',
+      args: [],
+    );
+  }
+
+  /// `Completed`
+  String get heatmapLevelCompleted {
+    return Intl.message(
+      'Completed',
+      name: 'heatmapLevelCompleted',
+      desc: 'Heatmap tap tooltip: habit was fully completed on this day',
+      args: [],
+    );
+  }
+
+  /// `12-Week Trend`
+  String get weeklyTrendTitle {
+    return Intl.message(
+      '12-Week Trend',
+      name: 'weeklyTrendTitle',
+      desc: 'Title of the 12-week completion rate trend card in statistics',
+      args: [],
+    );
+  }
+
+  /// `Habit Comparison`
+  String get habitComparisonTitle {
+    return Intl.message(
+      'Habit Comparison',
+      name: 'habitComparisonTitle',
+      desc: 'Title of the per-habit comparison bar chart card in statistics',
+      args: [],
+    );
+  }
+
+  /// `Check rate (scaled)`
+  String get comparisonCheckRateLabel {
+    return Intl.message(
+      'Check rate (scaled)',
+      name: 'comparisonCheckRateLabel',
+      desc: 'Legend label for the check-rate rod in the habit comparison chart',
+      args: [],
+    );
+  }
+
+  /// `Top streak (days)`
+  String get comparisonTopStreakLabel {
+    return Intl.message(
+      'Top streak (days)',
+      name: 'comparisonTopStreakLabel',
+      desc: 'Legend label for the top-streak rod in the habit comparison chart',
+      args: [],
+    );
+  }
+
+  /// `Best Day & Time`
+  String get bestDayTimeTitle {
+    return Intl.message(
+      'Best Day & Time',
+      name: 'bestDayTimeTitle',
+      desc: 'Title of the best day and best time summary card in statistics',
+      args: [],
+    );
+  }
+
+  /// `Best day: `
+  String get bestDayLabel {
+    return Intl.message(
+      'Best day: ',
+      name: 'bestDayLabel',
+      desc:
+          'Label prefix for the best day-of-week row (include trailing space)',
+      args: [],
+    );
+  }
+
+  /// `Best time: `
+  String get bestTimeLabel {
+    return Intl.message(
+      'Best time: ',
+      name: 'bestTimeLabel',
+      desc:
+          'Label prefix for the best time-of-day row (include trailing space)',
+      args: [],
+    );
+  }
+
+  /// `Not enough data`
+  String get notEnoughData {
+    return Intl.message(
+      'Not enough data',
+      name: 'notEnoughData',
+      desc:
+          'Shown when fewer than 14 events exist to determine the best day of week',
+      args: [],
+    );
+  }
+
+  /// `No notifications set`
+  String get noNotificationsSet {
+    return Intl.message(
+      'No notifications set',
+      name: 'noNotificationsSet',
+      desc: 'Shown when no habits have notification times configured',
+      args: [],
+    );
+  }
+
+  /// `Time is based on habit notification schedules.`
+  String get bestTimeDisclaimer {
+    return Intl.message(
+      'Time is based on habit notification schedules.',
+      name: 'bestTimeDisclaimer',
+      desc:
+          'Disclaimer that best time is derived from notification settings, not event timestamps',
+      args: [],
+    );
+  }
+
+  /// `Per Habit`
+  String get statisticsPerHabit {
+    return Intl.message(
+      'Per Habit',
+      name: 'statisticsPerHabit',
+      desc: 'Section header for the per-habit statistics area',
+      args: [],
+    );
+  }
+
+  /// `Overall Trends`
+  String get statisticsOverallTrends {
+    return Intl.message(
+      'Overall Trends',
+      name: 'statisticsOverallTrends',
+      desc: 'Section header for the aggregate trends area in statistics',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

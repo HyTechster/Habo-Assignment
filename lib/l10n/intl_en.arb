@@ -350,5 +350,77 @@
     "createCategory": "Create category",
     "all": "All",
     "selectIcon": "Pick an icon",
-    "searchIcons": "Search"
+    "searchIcons": "Search",
+    "heatmapLegendLess": "Less",
+    "@heatmapLegendLess": {
+      "description": "Heatmap legend label for the lower end of the activity scale"
+    },
+    "heatmapLegendMore": "More",
+    "@heatmapLegendMore": {
+      "description": "Heatmap legend label for the upper end of the activity scale"
+    },
+    "heatmapLevelNoData": "No data",
+    "@heatmapLevelNoData": {
+      "description": "Heatmap tap tooltip: no event was logged for this day"
+    },
+    "heatmapLevelSkipped": "Skipped",
+    "@heatmapLevelSkipped": {
+      "description": "Heatmap tap tooltip: habit was skipped on this day"
+    },
+    "heatmapLevelFailed": "Failed / Partial",
+    "@heatmapLevelFailed": {
+      "description": "Heatmap tap tooltip: habit was failed or only partially completed on this day"
+    },
+    "heatmapLevelCompleted": "Completed",
+    "@heatmapLevelCompleted": {
+      "description": "Heatmap tap tooltip: habit was fully completed on this day"
+    },
+    "weeklyTrendTitle": "12-Week Trend",
+    "@weeklyTrendTitle": {
+      "description": "Title of the 12-week completion rate trend card in statistics"
+    },
+    "habitComparisonTitle": "Habit Comparison",
+    "@habitComparisonTitle": {
+      "description": "Title of the per-habit comparison bar chart card in statistics"
+    },
+    "comparisonCheckRateLabel": "Check rate (scaled)",
+    "@comparisonCheckRateLabel": {
+      "description": "Legend label for the check-rate rod in the habit comparison chart"
+    },
+    "comparisonTopStreakLabel": "Top streak (days)",
+    "@comparisonTopStreakLabel": {
+      "description": "Legend label for the top-streak rod in the habit comparison chart"
+    },
+    "bestDayTimeTitle": "Best Day & Time",
+    "@bestDayTimeTitle": {
+      "description": "Title of the best day and best time summary card in statistics"
+    },
+    "bestDayLabel": "Best day: ",
+    "@bestDayLabel": {
+      "description": "Label prefix for the best day-of-week row (include trailing space)"
+    },
+    "bestTimeLabel": "Best time: ",
+    "@bestTimeLabel": {
+      "description": "Label prefix for the best time-of-day row (include trailing space)"
+    },
+    "notEnoughData": "Not enough data",
+    "@notEnoughData": {
+      "description": "Shown when fewer than 14 events exist to determine the best day of week"
+    },
+    "noNotificationsSet": "No notifications set",
+    "@noNotificationsSet": {
+      "description": "Shown when no habits have notification times configured"
+    },
+    "bestTimeDisclaimer": "Time is based on habit notification schedules.",
+    "@bestTimeDisclaimer": {
+      "description": "Disclaimer that best time is derived from notification settings, not event timestamps"
+    },
+    "statisticsPerHabit": "Per Habit",
+    "@statisticsPerHabit": {
+      "description": "Section header for the per-habit statistics area"
+    },
+    "statisticsOverallTrends": "Overall Trends",
+    "@statisticsOverallTrends": {
+      "description": "Section header for the aggregate trends area in statistics"
+    }
   }

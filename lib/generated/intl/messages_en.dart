@@ -112,6 +112,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupFailedError": MessageLookupByLibrary.simpleMessage(
       "ERROR: Creating backup failed.",
     ),
+    "bestDayLabel": MessageLookupByLibrary.simpleMessage("Best day: "),
+    "bestDayTimeTitle": MessageLookupByLibrary.simpleMessage("Best Day & Time"),
+    "bestTimeDisclaimer": MessageLookupByLibrary.simpleMessage(
+      "Time is based on habit notification schedules.",
+    ),
+    "bestTimeLabel": MessageLookupByLibrary.simpleMessage("Best time: "),
     "biometric": MessageLookupByLibrary.simpleMessage("Biometric"),
     "biometricAuthenticationRequired": MessageLookupByLibrary.simpleMessage(
       "Biometric authentication required",
@@ -148,6 +154,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "categoryUpdatedSuccessfully": m7,
     "check": MessageLookupByLibrary.simpleMessage("Check"),
     "close": MessageLookupByLibrary.simpleMessage("Close"),
+    "comparisonCheckRateLabel": MessageLookupByLibrary.simpleMessage(
+      "Check rate (scaled)",
+    ),
+    "comparisonTopStreakLabel": MessageLookupByLibrary.simpleMessage(
+      "Top streak (days)",
+    ),
     "complete": MessageLookupByLibrary.simpleMessage("Complete"),
     "congratulationsReward": MessageLookupByLibrary.simpleMessage(
       "Congratulations! Your reward:",
@@ -275,6 +287,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "habit": MessageLookupByLibrary.simpleMessage("Habit"),
     "habitArchived": MessageLookupByLibrary.simpleMessage("Habit archived"),
+    "habitComparisonTitle": MessageLookupByLibrary.simpleMessage(
+      "Habit Comparison",
+    ),
     "habitContract": MessageLookupByLibrary.simpleMessage("Habit contract"),
     "habitContractDescription": MessageLookupByLibrary.simpleMessage(
       "While positive reinforcement is recommended, some people may opt for a habit contract. A habit contract allows you to specify a sanction that will be imposed if you miss your habit, and may involve an accountability partner who helps supervise your goals.",
@@ -308,6 +323,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "haboSyncLearnMore": MessageLookupByLibrary.simpleMessage(
       "Learn more at habo.space/sync",
     ),
+    "heatmapLegendLess": MessageLookupByLibrary.simpleMessage("Less"),
+    "heatmapLegendMore": MessageLookupByLibrary.simpleMessage("More"),
+    "heatmapLevelCompleted": MessageLookupByLibrary.simpleMessage("Completed"),
+    "heatmapLevelFailed": MessageLookupByLibrary.simpleMessage(
+      "Failed / Partial",
+    ),
+    "heatmapLevelNoData": MessageLookupByLibrary.simpleMessage("No data"),
+    "heatmapLevelSkipped": MessageLookupByLibrary.simpleMessage("Skipped"),
     "ifYouWantToSupport": MessageLookupByLibrary.simpleMessage(
       "If you want to support Habo you can:",
     ),
@@ -329,6 +352,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "There is no data about habits.",
     ),
     "noHabitsInCategory": m12,
+    "noNotificationsSet": MessageLookupByLibrary.simpleMessage(
+      "No notifications set",
+    ),
+    "notEnoughData": MessageLookupByLibrary.simpleMessage("Not enough data"),
     "notSoSuccessful": MessageLookupByLibrary.simpleMessage(
       "Not so successful",
     ),
@@ -420,6 +447,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "soundEffects": MessageLookupByLibrary.simpleMessage("Sound effects"),
     "sourceCode": MessageLookupByLibrary.simpleMessage("Source code (GitHub)"),
     "statistics": MessageLookupByLibrary.simpleMessage("Statistics"),
+    "statisticsOverallTrends": MessageLookupByLibrary.simpleMessage(
+      "Overall Trends",
+    ),
+    "statisticsPerHabit": MessageLookupByLibrary.simpleMessage("Per Habit"),
     "successful": MessageLookupByLibrary.simpleMessage("Successful"),
     "tapCheckLongPressMenu": MessageLookupByLibrary.simpleMessage(
       "Tap to check, long press for menu",
@@ -453,6 +484,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "warning": MessageLookupByLibrary.simpleMessage("Warning"),
     "week": MessageLookupByLibrary.simpleMessage("Week"),
+    "weeklyTrendTitle": MessageLookupByLibrary.simpleMessage("12-Week Trend"),
     "whatsNewTitle": MessageLookupByLibrary.simpleMessage("What\'s New"),
     "whatsNewVersion": m16,
     "yourCommentHere": MessageLookupByLibrary.simpleMessage("Your note here"),
