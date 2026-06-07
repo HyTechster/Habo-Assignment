@@ -30,6 +30,12 @@ class AllStatistics {
   WeeklyTrendData? overallWeeklyTrend;
   ComparisonData? comparison;
   BestDayTimeData bestDayTime = BestDayTimeData();
+
+  /// Deduplicated, sorted category names across all non-archived habits.
+  /// Shared between the leaderboard, heatmap, and weekly trend filter dropdowns.
+  /// Computed once by calculateComparison() and/or calculateHeatmaps() so
+  /// statistics_screen.dart can pass it to any widget without recalculating.
+  List<String> allCategoryTitles = [];
 }
 
 /// Heatmap completion levels for a single day:
@@ -40,17 +46,36 @@ class AllStatistics {
 ///
 /// Keys are normalised to midnight UTC: DateTime.utc(year, month, day).
 /// Do not use the raw event datetime (stored at noon UTC) as a map key.
+///
+/// New multi-row heatmap fields (populated in Phase 5 of blueprint2):
+/// [habitColor] — reserved for future per-habit colour; null falls back to checkColor.
+/// [categoryTitle] — primary category title for grouping rows under section headers.
+/// [categoryId] — primary category ID for stable sort ordering; null if no categories.
+/// [streakRunLengths] — consecutive level-3 run length ending on each completed day,
+///   capped at 10. Used to darken the cell colour as a streak grows. Keys are the same
+///   midnight-UTC DateTimes as [dailyCounts]; missing key defaults to 0 in the widget.
 class HeatmapData {
   String title;
   Map<DateTime, int> dailyCounts;
   int year;
 
+  // Multi-row heatmap fields
+  Color? habitColor;
+  String categoryTitle;
+  int? categoryId;
+  Map<DateTime, int> streakRunLengths;
+
   HeatmapData({
     required this.title,
     Map<DateTime, int>? dailyCounts,
     int? year,
+    this.habitColor,
+    this.categoryTitle = '',
+    this.categoryId,
+    Map<DateTime, int>? streakRunLengths,
   })  : dailyCounts = dailyCounts ?? {},
-        year = year ?? DateTime.now().year;
+        year = year ?? DateTime.now().year,
+        streakRunLengths = streakRunLengths ?? {};
 }
 
 /// Completion-rate trend across the most recent 12 weeks.
@@ -61,33 +86,70 @@ class HeatmapData {
 ///
 /// [weekLabels] — exactly 12 elements; short label for the Monday of each
 /// week formatted as "MMM d" (e.g. "May 5"). Index-aligned to weeklyRates.
+///
+/// New tooltip and filter fields (populated in Phase 6 of blueprint2):
+/// [weekCompletedHabits] — exactly 12 elements. Each inner list holds the
+///   titles of habits that had at least one level-3 (check-equivalent) day
+///   during that week, in the order they appear in allHabits.
+/// [allCategoryTitles] — deduplicated, sorted category names across all habits
+///   in this trend; populates the category filter dropdown in WeeklyTrendCard.
+/// [habitCategoryMap] — maps habit title → list of category titles; allows the
+///   widget to compute filtered rates client-side without a server round-trip.
 class WeeklyTrendData {
   String title;
   List<double> weeklyRates;
   List<String> weekLabels;
 
+  // Tooltip payload fields
+  List<List<String>> weekCompletedHabits;
+  List<String> allCategoryTitles;
+
+  // Category-filter support: habitTitle → [categoryTitle, ...]
+  Map<String, List<String>> habitCategoryMap;
+
   WeeklyTrendData({
     required this.title,
     required this.weeklyRates,
     required this.weekLabels,
-  });
+    List<List<String>>? weekCompletedHabits,
+    this.allCategoryTitles = const [],
+    Map<String, List<String>>? habitCategoryMap,
+  })  : weekCompletedHabits =
+            weekCompletedHabits ?? List.generate(12, (_) => []),
+        habitCategoryMap = habitCategoryMap ?? {};
 }
 
-/// Side-by-side comparison of check rates and top streaks across habits.
+/// Side-by-side comparison of check rates and streaks across non-archived habits.
 ///
 /// Only non-archived habits are included (see calculateComparison in Statistics).
 /// [colors] is reserved for future per-habit color assignment; currently all null.
+///
+/// New leaderboard fields (populated in Phase 4 of blueprint2):
+/// [actualStreaks] — current running streak per habit (forward-scan, same index as habitTitles).
+/// [habitCategories] — comma-joined category names per habit; empty string if none.
+/// [habitCategoryList] — raw list of category title strings per habit; used for filter matching.
+/// [allCategoryTitles] — deduplicated, sorted list of all category names across the filtered habits.
 class ComparisonData {
   List<String> habitTitles;
   List<double> checkRates;
   List<int> topStreaks;
   List<Color?> colors;
 
+  // Leaderboard fields — populated in calculateComparison()
+  List<int> actualStreaks;
+  List<String> habitCategories;
+  List<List<String>> habitCategoryList;
+  List<String> allCategoryTitles;
+
   ComparisonData({
     required this.habitTitles,
     required this.checkRates,
     required this.topStreaks,
     required this.colors,
+    this.actualStreaks = const [],
+    this.habitCategories = const [],
+    this.habitCategoryList = const [],
+    this.allCategoryTitles = const [],
   });
 }
 
@@ -225,9 +287,26 @@ class Statistics {
     // Populate the four enhanced statistics fields.
     // Note: allHabits is passed unfiltered here; comparison filters internally.
     stats.heatmaps = calculateHeatmaps(habits, DateTime.now().year);
+
+    // Phase 5 §5.3 — derive allCategoryTitles from heatmaps (covers all habits,
+    // including archived, because calculateHeatmaps receives unfiltered allHabits).
+    stats.allCategoryTitles = stats.heatmaps
+        .map((h) => h.categoryTitle)
+        .where((t) => t.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+
     stats.overallWeeklyTrend = calculateWeeklyTrend(habits);
     stats.comparison = calculateComparison(habits, stats.habitsData);
     stats.bestDayTime = calculateBestDayTime(habits);
+
+    // Phase 4 §4.2 — overwrite allCategoryTitles with the non-archived-only
+    // version when a comparison result is available. This is the preferred source
+    // because it excludes archived habits from the filter dropdowns.
+    if (stats.comparison != null) {
+      stats.allCategoryTitles = stats.comparison!.allCategoryTitles;
+    }
 
     return stats;
   }
@@ -242,6 +321,12 @@ class Statistics {
 
     for (var habit in habits) {
       final heatmap = HeatmapData(title: habit.habitData.title, year: year);
+
+      // Populate category fields from the first category (if any) — Phase 5 §5.1
+      if (habit.habitData.categories.isNotEmpty) {
+        heatmap.categoryTitle = habit.habitData.categories.first.title;
+        heatmap.categoryId = habit.habitData.categories.first.id;
+      }
 
       habit.habitData.events.forEach((key, value) {
         if (value[0] != null &&
@@ -281,6 +366,33 @@ class Statistics {
         }
       });
 
+      // Phase 5 §5.2 — compute streakRunLengths in a second pass over dailyCounts.
+      // Sort explicitly even though SplayTreeMap would already be ordered — the
+      // dailyCounts map is a plain HashMap whose keys have no guaranteed order.
+      final sortedDates = heatmap.dailyCounts.keys.toList()..sort();
+      int currentRun = 0;
+      DateTime? prevDate;
+
+      for (final date in sortedDates) {
+        final level = heatmap.dailyCounts[date]!;
+
+        if (level == 3) {
+          // Gap since the last processed date breaks the consecutive run.
+          if (prevDate != null && date.difference(prevDate).inDays > 1) {
+            currentRun = 0;
+          }
+          currentRun++;
+          heatmap.streakRunLengths[date] = currentRun.clamp(1, 10);
+        } else {
+          // Any non-level-3 event (skip/fail/partial) breaks the run.
+          currentRun = 0;
+        }
+
+        // Always advance prevDate so a subsequent level-3 day can detect
+        // any gap through intermediate non-event days.
+        prevDate = date;
+      }
+
       result.add(heatmap);
     }
 
@@ -293,6 +405,10 @@ class Statistics {
   /// weeklyRate = (days where ≥1 habit reached level 3) /
   ///              (days where ≥1 habit had any non-zero level).
   /// Returns `null` when every weekly rate is 0.0.
+  ///
+  /// Phase 6 additions: also populates [WeeklyTrendData.weekCompletedHabits],
+  /// [WeeklyTrendData.allCategoryTitles], and [WeeklyTrendData.habitCategoryMap]
+  /// for the tap-tooltip and category-filter features in WeeklyTrendCard.
   static WeeklyTrendData? calculateWeeklyTrend(List<Habit> habits) {
     final today = DateTime.now();
     final todayNorm = DateTime.utc(today.year, today.month, today.day);
@@ -302,7 +418,19 @@ class Statistics {
     // key = midnight-UTC date, value = list of levels from each habit entry
     final Map<DateTime, List<int>> dayLevels = {};
 
+    // Phase 6 §6.1 — per-week set of habit titles that had ≥1 level-3 day
+    final Map<int, Set<String>> weekCompletedHabitSets = {
+      for (int i = 0; i < 12; i++) i: <String>{},
+    };
+
+    // Phase 6 §6.2 — habit title → list of its category titles (for filter)
+    final Map<String, List<String>> habitCategoryMap = {};
+
     for (var habit in habits) {
+      // Build category map entry before the events loop
+      habitCategoryMap[habit.habitData.title] =
+          habit.habitData.categories.map((c) => c.title).toList();
+
       habit.habitData.events.forEach((key, value) {
         if (value[0] != null && value[0] != DayType.clear) {
           final norm = DateTime.utc(key.year, key.month, key.day);
@@ -338,6 +466,15 @@ class Statistics {
             }
 
             dayLevels.putIfAbsent(norm, () => []).add(level);
+
+            // Track level-3 completions per week for the tooltip payload
+            if (level == 3) {
+              final weekIndex = norm.difference(windowStart).inDays ~/ 7;
+              if (weekIndex >= 0 && weekIndex < 12) {
+                weekCompletedHabitSets[weekIndex]!
+                    .add(habit.habitData.title);
+              }
+            }
           }
         }
       });
@@ -374,10 +511,26 @@ class Statistics {
 
     if (weeklyRates.every((r) => r == 0.0)) return null;
 
+    // Convert per-week sets to sorted lists (deterministic order in tooltip)
+    final weekCompletedHabits = List.generate(
+      12,
+      (i) => weekCompletedHabitSets[i]!.toList()..sort(),
+    );
+
+    // allCategoryTitles for the WeeklyTrendCard filter dropdown
+    final allCategoryTitles = habitCategoryMap.values
+        .expand((list) => list)
+        .toSet()
+        .toList()
+      ..sort();
+
     return WeeklyTrendData(
       title: 'Overall',
       weeklyRates: weeklyRates,
       weekLabels: weekLabels,
+      weekCompletedHabits: weekCompletedHabits,
+      allCategoryTitles: allCategoryTitles,
+      habitCategoryMap: habitCategoryMap,
     );
   }
 
@@ -393,6 +546,11 @@ class Statistics {
     final List<double> checkRates = [];
     final List<int> topStreaks = [];
     final List<Color?> colors = [];
+
+    // New leaderboard fields (Phase 4 of blueprint2)
+    final List<int> actualStreaks = [];
+    final List<String> habitCategories = [];
+    final List<List<String>> habitCategoryList = [];
 
     for (int i = 0; i < habits.length; i++) {
       final habit = habits[i];
@@ -423,7 +581,21 @@ class Statistics {
           : checkEquivalentDays / totalLoggedDays);
       topStreaks.add(stat.topStreak);
       colors.add(null); // Reserved for future per-habit color assignment
+
+      // Current streak and category fields
+      actualStreaks.add(stat.actualStreak);
+      final categoryTitles =
+          habit.habitData.categories.map((c) => c.title).toList();
+      habitCategoryList.add(categoryTitles);
+      habitCategories.add(categoryTitles.join(', '));
     }
+
+    // Build deduplicated, sorted list of all category names across non-archived habits
+    final allCategoryTitles = habitCategoryList
+        .expand((list) => list)
+        .toSet()
+        .toList()
+      ..sort();
 
     if (habitTitles.length < 2) return null;
 
@@ -432,6 +604,10 @@ class Statistics {
       checkRates: checkRates,
       topStreaks: topStreaks,
       colors: colors,
+      actualStreaks: actualStreaks,
+      habitCategories: habitCategories,
+      habitCategoryList: habitCategoryList,
+      allCategoryTitles: allCategoryTitles,
     );
   }
 

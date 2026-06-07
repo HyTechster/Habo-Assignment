@@ -2111,6 +2111,229 @@ class S {
       args: [],
     );
   }
+
+  /// `Highest first`
+  String get leaderboardSortHighest {
+    return Intl.message(
+      'Highest first',
+      name: 'leaderboardSortHighest',
+      desc: 'Leaderboard sort option: highest metric value shown first',
+      args: [],
+    );
+  }
+
+  /// `Lowest first`
+  String get leaderboardSortLowest {
+    return Intl.message(
+      'Lowest first',
+      name: 'leaderboardSortLowest',
+      desc: 'Leaderboard sort option: lowest metric value shown first',
+      args: [],
+    );
+  }
+
+  /// `By category`
+  String get leaderboardSortByCategory {
+    return Intl.message(
+      'By category',
+      name: 'leaderboardSortByCategory',
+      desc: 'Leaderboard sort option: habits grouped by category',
+      args: [],
+    );
+  }
+
+  /// `All`
+  String get leaderboardFilterAll {
+    return Intl.message(
+      'All',
+      name: 'leaderboardFilterAll',
+      desc: 'Leaderboard category filter dropdown option: show all categories',
+      args: [],
+    );
+  }
+
+  /// `No habits in this category`
+  String get leaderboardEmpty {
+    return Intl.message(
+      'No habits in this category',
+      name: 'leaderboardEmpty',
+      desc:
+          'Shown in the leaderboard when the selected category filter has no matching habits',
+      args: [],
+    );
+  }
+
+  /// `This week`
+  String get weeklyTrendThisWeek {
+    return Intl.message(
+      'This week',
+      name: 'weeklyTrendThisWeek',
+      desc:
+          'Label for the stat box showing the current week\'s completion rate',
+      args: [],
+    );
+  }
+
+  /// `12-wk avg`
+  String get weeklyTrendAverage {
+    return Intl.message(
+      '12-wk avg',
+      name: 'weeklyTrendAverage',
+      desc:
+          'Label for the stat box showing the 12-week average completion rate',
+      args: [],
+    );
+  }
+
+  /// `All habits`
+  String get weeklyTrendFilterAll {
+    return Intl.message(
+      'All habits',
+      name: 'weeklyTrendFilterAll',
+      desc:
+          'Category filter dropdown option in weekly trend card: show all habits',
+      args: [],
+    );
+  }
+
+  /// `No completions`
+  String get weeklyTrendNoCompletions {
+    return Intl.message(
+      'No completions',
+      name: 'weeklyTrendNoCompletions',
+      desc:
+          'Tooltip line shown when no habits were completed in the tapped week',
+      args: [],
+    );
+  }
+
+  /// `… +{count} more`
+  String weeklyTrendMoreHabits(int count) {
+    return Intl.message(
+      '… +$count more',
+      name: 'weeklyTrendMoreHabits',
+      desc:
+          'Tooltip suffix showing how many habit titles were cut off (count = number hidden)',
+      args: [count],
+    );
+  }
+
+  /// `Filter by category`
+  String get heatmapFilterCategoryTitle {
+    return Intl.message(
+      'Filter by category',
+      name: 'heatmapFilterCategoryTitle',
+      desc: 'Title of the category filter dialog in the yearly heatmap card',
+      args: [],
+    );
+  }
+
+  /// `(No category)`
+  String get heatmapNoCategory {
+    return Intl.message(
+      '(No category)',
+      name: 'heatmapNoCategory',
+      desc:
+          'Checkbox label for habits that have no category assigned, inside the heatmap category filter dialog',
+      args: [],
+    );
+  }
+
+  /// `Apply`
+  String get heatmapFilterApply {
+    return Intl.message(
+      'Apply',
+      name: 'heatmapFilterApply',
+      desc: 'Confirm button in the heatmap filter dialogs',
+      args: [],
+    );
+  }
+
+  /// `Filter by habit`
+  String get heatmapFilterHabitTitle {
+    return Intl.message(
+      'Filter by habit',
+      name: 'heatmapFilterHabitTitle',
+      desc: 'Title of the habit filter dialog in the yearly heatmap card',
+      args: [],
+    );
+  }
+
+  /// `Categories`
+  String get heatmapFilterCategories {
+    return Intl.message(
+      'Categories',
+      name: 'heatmapFilterCategories',
+      desc:
+          'Label on the category filter button in the heatmap card when no filter is active',
+      args: [],
+    );
+  }
+
+  /// `Habits`
+  String get heatmapFilterHabits {
+    return Intl.message(
+      'Habits',
+      name: 'heatmapFilterHabits',
+      desc:
+          'Label on the habit filter button in the heatmap card when no filter is active',
+      args: [],
+    );
+  }
+
+  /// `{count} selected`
+  String heatmapFilterSelected(int count) {
+    return Intl.message(
+      '$count selected',
+      name: 'heatmapFilterSelected',
+      desc:
+          'Label on a filter button showing how many items are currently selected',
+      args: [count],
+    );
+  }
+
+  /// `Showing:`
+  String get heatmapFilterShowing {
+    return Intl.message(
+      'Showing:',
+      name: 'heatmapFilterShowing',
+      desc:
+          'Prefix label for the active filter summary row in the heatmap card',
+      args: [],
+    );
+  }
+
+  /// `Clear`
+  String get heatmapFilterClear {
+    return Intl.message(
+      'Clear',
+      name: 'heatmapFilterClear',
+      desc: 'Button to clear all active filters in the heatmap card',
+      args: [],
+    );
+  }
+
+  /// `No habits match the current filter`
+  String get heatmapFilterEmpty {
+    return Intl.message(
+      'No habits match the current filter',
+      name: 'heatmapFilterEmpty',
+      desc:
+          'Empty state message shown in the heatmap card when all habits are filtered out',
+      args: [],
+    );
+  }
+
+  /// `Other`
+  String get heatmapCategoryOther {
+    return Intl.message(
+      'Other',
+      name: 'heatmapCategoryOther',
+      desc:
+          'Section header label for habits that have no category assigned (used in heatmap and leaderboard)',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

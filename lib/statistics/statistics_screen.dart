@@ -8,7 +8,6 @@ import 'package:habo/statistics/overall_statistics_card.dart';
 import 'package:habo/statistics/statistics.dart';
 import 'package:habo/statistics/best_day_time_card.dart';
 import 'package:habo/statistics/habit_comparison_card.dart';
-import 'package:habo/statistics/statistics_card.dart';
 import 'package:habo/statistics/weekly_trend_card.dart';
 import 'package:habo/statistics/yearly_heatmap_card.dart';
 import 'package:habo/navigation/app_state_manager.dart';
@@ -62,18 +61,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   // notification while this screen is open — known
                   // anti-pattern. Do not fix here to avoid regressions.
                   final habitsData = snapshot.data!.habitsData;
-                  final heatmaps = snapshot.data!.heatmaps;
-
-                  // Reusable section-header style for "Per Habit" /
-                  // "Overall Trends" dividers.
-                  TextStyle sectionStyle = TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.5),
-                  );
 
                   return ListView(
                     scrollDirection: Axis.vertical,
@@ -84,48 +71,15 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         total: snapshot.data!.total,
                         habits: habitsData.length,
                       ),
-
-                      // ── Per Habit ───────────────────────────────────────
-                      Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                        child: Text(S.of(context).statisticsPerHabit, style: sectionStyle),
-                      ),
-                      // Inner non-scrolling list: each habit gets a
-                      // StatisticsCard followed immediately by its
-                      // YearlyHeatmapCard (Option A from blueprint §8.6).
-                      // Both lists (habitsData, heatmaps) are guaranteed to be
-                      // the same length — they are built from the same
-                      // allHabits iteration in calculateStatistics.
-                      ListView(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: List.generate(
-                          habitsData.length,
-                          (i) => Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: StatisticsCard(data: habitsData[i]),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    12, 0, 12, 12),
-                                child:
-                                    YearlyHeatmapCard(data: heatmaps[i]),
-                              ),
-                            ],
+                      // HabitComparisonCard: null when fewer than 2
+                      // non-archived habits exist.
+                      if (snapshot.data!.comparison != null)
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: HabitComparisonCard(
+                            data: snapshot.data!.comparison!,
                           ),
                         ),
-                      ),
-
-                      // ── Overall Trends ──────────────────────────────────
-                      Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                        child:
-                            Text(S.of(context).statisticsOverallTrends, style: sectionStyle),
-                      ),
                       // WeeklyTrendCard: null when the 12-week window has
                       // no logged events.
                       if (snapshot.data!.overallWeeklyTrend != null)
@@ -135,13 +89,16 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                             data: snapshot.data!.overallWeeklyTrend!,
                           ),
                         ),
-                      // HabitComparisonCard: null when fewer than 2
-                      // non-archived habits exist.
-                      if (snapshot.data!.comparison != null)
+                      // YearlyHeatmapCard: single multi-row card showing
+                      // all habits — replaces the per-habit cards removed
+                      // from the inner ListView above.
+                      if (snapshot.data!.heatmaps.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.all(12.0),
-                          child: HabitComparisonCard(
-                            data: snapshot.data!.comparison!,
+                          child: YearlyHeatmapCard(
+                            allHeatmaps: snapshot.data!.heatmaps,
+                            allCategoryTitles:
+                                snapshot.data!.allCategoryTitles,
                           ),
                         ),
                       // BestDayTimeCard: never null — carries zeroed

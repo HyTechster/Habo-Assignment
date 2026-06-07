@@ -1,19 +1,37 @@
-import 'dart:math' show max;
-
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:habo/generated/l10n.dart';
 import 'package:habo/settings/settings_manager.dart';
 import 'package:habo/statistics/statistics.dart';
 import 'package:provider/provider.dart';
 
-/// Renders a horizontally scrollable grouped bar chart comparing all
-/// non-archived habits side by side.
+enum LeaderboardMetric { currentStreak, topStreak, completionRate }
+
+enum LeaderboardSort { highestFirst, lowestFirst, byCategory }
+
+/// Internal record for one habit's leaderboard entry after filtering/sorting.
+class _LeaderboardEntry {
+  final int index;
+  final String title;
+  final int currentStreak;
+  final int topStreak;
+  final double checkRate;
+  final List<String> categories;
+
+  const _LeaderboardEntry({
+    required this.index,
+    required this.title,
+    required this.currentStreak,
+    required this.topStreak,
+    required this.checkRate,
+    required this.categories,
+  });
+}
+
+/// Leaderboard card ranking all non-archived habits by the active metric.
 ///
-/// Each habit group shows up to two rods:
-///   • Check rate (green): [checkRates[i] × maxY] — scaled to the same axis
-///     as the streak so both rods share one y-axis.
-///   • Top streak (orange): [topStreaks[i]] days.
+/// Replaces the previous bar chart (blueprint2 Phase 7). Three metric modes
+/// (current streak, top streak, completion rate), three sort modes, and an
+/// optional category filter.
 ///
 /// The caller is responsible for the null guard — [ComparisonData] is only
 /// null when fewer than 2 non-archived habits exist.
@@ -27,138 +45,304 @@ class HabitComparisonCard extends StatefulWidget {
 }
 
 class _HabitComparisonCardState extends State<HabitComparisonCard> {
-  bool showCheckRate = true;
-  bool showTopStreak = true;
+  LeaderboardMetric _metric = LeaderboardMetric.currentStreak;
+  LeaderboardSort _sort = LeaderboardSort.highestFirst;
+  String? _selectedCategory; // null = all categories
 
-  /// Truncates [title] to 6 characters and appends "…" when longer.
-  String _abbreviate(String title) {
-    const maxChars = 6;
-    if (title.length <= maxChars) return title;
-    return '${title.substring(0, maxChars)}…';
+  // ── Data helpers ──────────────────────────────────────────────────────────
+
+  double _metricValue(_LeaderboardEntry e) {
+    switch (_metric) {
+      case LeaderboardMetric.currentStreak:
+        return e.currentStreak.toDouble();
+      case LeaderboardMetric.topStreak:
+        return e.topStreak.toDouble();
+      case LeaderboardMetric.completionRate:
+        return e.checkRate;
+    }
+  }
+
+  String _metricLabel(_LeaderboardEntry e) {
+    switch (_metric) {
+      case LeaderboardMetric.currentStreak:
+        return '${e.currentStreak}d';
+      case LeaderboardMetric.topStreak:
+        return '${e.topStreak}d';
+      case LeaderboardMetric.completionRate:
+        return '${(e.checkRate * 100).round()}%';
+    }
+  }
+
+  List<_LeaderboardEntry> _filteredSortedList() {
+    final d = widget.data;
+
+    // Build one entry per habit
+    final entries = <_LeaderboardEntry>[
+      for (int i = 0; i < d.habitTitles.length; i++)
+        _LeaderboardEntry(
+          index: i,
+          title: d.habitTitles[i],
+          currentStreak:
+              i < d.actualStreaks.length ? d.actualStreaks[i] : 0,
+          topStreak: d.topStreaks[i],
+          checkRate: d.checkRates[i],
+          categories: i < d.habitCategoryList.length
+              ? d.habitCategoryList[i]
+              : const [],
+        ),
+    ];
+
+    // Category filter
+    if (_selectedCategory != null) {
+      entries
+          .retainWhere((e) => e.categories.contains(_selectedCategory));
+    }
+
+    // Sort
+    switch (_sort) {
+      case LeaderboardSort.highestFirst:
+        entries
+            .sort((a, b) => _metricValue(b).compareTo(_metricValue(a)));
+        break;
+      case LeaderboardSort.lowestFirst:
+        entries
+            .sort((a, b) => _metricValue(a).compareTo(_metricValue(b)));
+        break;
+      case LeaderboardSort.byCategory:
+        entries.sort((a, b) {
+          // Uncategorised habits sort to the end (￿ > any letter)
+          final catA = a.categories.isNotEmpty
+              ? a.categories.first
+              : '￿';
+          final catB = b.categories.isNotEmpty
+              ? b.categories.first
+              : '￿';
+          final cmp = catA.compareTo(catB);
+          if (cmp != 0) return cmp;
+          // Within the same category: highest metric first
+          return _metricValue(b).compareTo(_metricValue(a));
+        });
+        break;
+    }
+
+    return entries;
+  }
+
+  // ── Widget builders ───────────────────────────────────────────────────────
+
+  /// 32×32 toggle button — matches MonthlyGraph's Material button pattern.
+  Widget _toggleButton({
+    required bool active,
+    required Color activeColor,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    final primaryContainer =
+        Theme.of(context).colorScheme.primaryContainer;
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Material(
+        color: active ? activeColor : primaryContainer,
+        borderRadius: BorderRadius.circular(10.0),
+        elevation: 2,
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: IconButton(
+            splashColor: Colors.transparent,
+            padding: EdgeInsets.zero,
+            icon: Icon(icon, size: 16),
+            color: active ? Colors.white : activeColor,
+            onPressed: onPressed,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _rankWidget(int rank) {
+    switch (rank) {
+      case 1:
+        return const Center(
+            child: Text('🥇', style: TextStyle(fontSize: 18)));
+      case 2:
+        return const Center(
+            child: Text('🥈', style: TextStyle(fontSize: 18)));
+      case 3:
+        return const Center(
+            child: Text('🥉', style: TextStyle(fontSize: 18)));
+      default:
+        return Text(
+          '$rank',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13,
+            color: Theme.of(context)
+                .colorScheme
+                .onSurface
+                .withValues(alpha: 0.5),
+          ),
+        );
+    }
+  }
+
+  Widget _buildRow(
+    _LeaderboardEntry entry,
+    int rank,
+    double maxValue,
+  ) {
+    final checkColor =
+        Provider.of<SettingsManager>(context, listen: false).checkColor;
+    final fraction = maxValue > 0
+        ? (_metricValue(entry) / maxValue).clamp(0.0, 1.0)
+        : 0.0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          // Fixed-width rank slot
+          SizedBox(width: 32, child: _rankWidget(rank)),
+          const SizedBox(width: 8),
+          // Habit name — ellipsized
+          Expanded(
+            child: Text(
+              entry.title,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Proportional bar
+          Expanded(
+            flex: 2,
+            child: ClipRect(
+              child: SizedBox(
+                height: 8,
+                child: Stack(
+                  children: [
+                    // Background track
+                    Container(
+                      decoration: BoxDecoration(
+                        color: checkColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    // Filled portion
+                    FractionallySizedBox(
+                      widthFactor: fraction,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: checkColor,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Exact value — right-aligned in fixed slot
+          SizedBox(
+            width: 48,
+            child: Text(
+              _metricLabel(entry),
+              textAlign: TextAlign.right,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _categoryHeader(String categoryTitle) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 2),
+      child: Text(
+        // Empty title means uncategorised habits — label as "Other"
+        categoryTitle.isEmpty
+            ? S.of(context).heatmapCategoryOther
+            : categoryTitle,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context)
+              .colorScheme
+              .onSurface
+              .withValues(alpha: 0.5),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Read colours once — listen: false convention used throughout statistics widgets
-    final settings = Provider.of<SettingsManager>(context, listen: false);
-    final checkColor = settings.checkColor;
-    final gridLineColor = Theme.of(context).colorScheme.surfaceContainerHighest;
-    final primaryContainer = Theme.of(context).colorScheme.primaryContainer;
-    final muteColor =
-        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6);
+    final checkColor =
+        Provider.of<SettingsManager>(context, listen: false).checkColor;
+    final primaryContainer =
+        Theme.of(context).colorScheme.primaryContainer;
 
-    // maxY: max top-streak value rounded up to the nearest 5, minimum 10.
-    final maxTopStreak = widget.data.topStreaks.isNotEmpty
-        ? widget.data.topStreaks.reduce(max)
-        : 0;
-    final double maxY =
-        max(10.0, ((maxTopStreak / 5.0).ceil() * 5.0).toDouble());
+    final entries = _filteredSortedList();
+    final maxValue = entries.isEmpty
+        ? 0.0
+        : entries
+            .map(_metricValue)
+            .reduce((a, b) => a > b ? a : b);
 
-    final double rodWidth = (showCheckRate && showTopStreak) ? 8.0 : 12.0;
-    final int habitCount = widget.data.habitTitles.length;
-    final double chartWidth =
-        max(MediaQuery.of(context).size.width, habitCount * 60.0);
+    // ── Build the ordered list of row/header/divider widgets ─────────────
+    final List<Widget> rowWidgets = [];
 
-    // ── Local title builders ─────────────────────────────────────────────
-
-    Widget bottomTitle(double value, TitleMeta meta) {
-      final index = value.round();
-      if (index < 0 || index >= widget.data.habitTitles.length) {
-        return const SizedBox.shrink();
-      }
-      return SideTitleWidget(
-        meta: meta,
-        space: 4,
-        child: Text(
-          _abbreviate(widget.data.habitTitles[index]),
-          style: const TextStyle(fontSize: 9),
-        ),
-      );
-    }
-
-    Widget leftTitle(double value, TitleMeta meta) {
-      final double half = maxY / 2;
-      final String label;
-      if (value.abs() < 0.5) {
-        label = '0';
-      } else if ((value - half).abs() < 0.5) {
-        label = half.round().toString();
-      } else if ((value - maxY).abs() < 0.5) {
-        label = maxY.round().toString();
-      } else {
-        return const SizedBox.shrink();
-      }
-      return SideTitleWidget(
-        meta: meta,
-        space: 4,
-        child: Text(label, style: const TextStyle(fontSize: 9)),
-      );
-    }
-
-    // ── Bar groups: one per habit, up to 2 rods ──────────────────────────
-
-    List<BarChartGroupData> buildBarGroups() {
-      return List.generate(habitCount, (i) {
-        return BarChartGroupData(
-          x: i,
-          barRods: [
-            if (showCheckRate)
-              BarChartRodData(
-                toY: widget.data.checkRates[i] * maxY,
-                color: checkColor,
-                width: rodWidth,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(4),
-                ),
+    if (entries.isEmpty) {
+      rowWidgets.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Center(
+            child: Text(
+              S.of(context).leaderboardEmpty,
+              style: TextStyle(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.5),
               ),
-            if (showTopStreak)
-              BarChartRodData(
-                toY: widget.data.topStreaks[i].toDouble(),
-                color: Colors.orange,
-                width: rodWidth,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(4),
-                ),
-              ),
-            // Transparent placeholder keeps the chart alive when both are off
-            if (!showCheckRate && !showTopStreak)
-              BarChartRodData(
-                toY: 0,
-                color: Colors.transparent,
-                width: 4,
-              ),
-          ],
-        );
-      });
-    }
-
-    // ── Toggle button: matches MonthlyGraph's 32×32 Material pattern ─────
-
-    Widget toggleButton({
-      required bool active,
-      required Color activeColor,
-      required IconData icon,
-      required VoidCallback onPressed,
-    }) {
-      return Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Material(
-          color: active ? activeColor : primaryContainer,
-          borderRadius: BorderRadius.circular(10.0),
-          elevation: 2,
-          child: SizedBox(
-            width: 32,
-            height: 32,
-            child: IconButton(
-              splashColor: Colors.transparent,
-              padding: EdgeInsets.zero,
-              icon: Icon(icon, size: 16),
-              color: active ? Colors.white : activeColor,
-              onPressed: onPressed,
             ),
           ),
         ),
       );
+    } else {
+      bool needsThinDivider = false;
+      String? lastCategory;
+      int rank = 1;
+
+      for (final entry in entries) {
+        if (_sort == LeaderboardSort.byCategory) {
+          final primaryCat =
+              entry.categories.isNotEmpty ? entry.categories.first : '';
+
+          if (primaryCat != lastCategory) {
+            // New category group — thick divider (except before the very first)
+            if (lastCategory != null) {
+              rowWidgets.add(const Divider(height: 8, thickness: 1.5));
+              needsThinDivider = false;
+            }
+            rowWidgets.add(_categoryHeader(primaryCat));
+            lastCategory = primaryCat;
+            needsThinDivider = false;
+          }
+        }
+
+        // Thin divider between rows (not before the first row of each section)
+        if (needsThinDivider) {
+          rowWidgets.add(const Divider(height: 1));
+        }
+
+        rowWidgets.add(_buildRow(entry, rank, maxValue));
+        needsThinDivider = true;
+        rank++;
+      }
     }
 
     return Card(
@@ -172,7 +356,7 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header + toggle buttons ───────────────────────────────────
+            // ── Row 1: card title + metric toggle buttons ─────────────────
             Row(
               children: [
                 Expanded(
@@ -182,123 +366,97 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
                         fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                toggleButton(
-                  active: showCheckRate,
+                // Current streak
+                _toggleButton(
+                  active: _metric == LeaderboardMetric.currentStreak,
+                  activeColor: checkColor,
+                  icon: Icons.local_fire_department,
+                  onPressed: () => setState(
+                      () => _metric = LeaderboardMetric.currentStreak),
+                ),
+                // Top streak
+                _toggleButton(
+                  active: _metric == LeaderboardMetric.topStreak,
+                  activeColor: Colors.amber,
+                  icon: Icons.emoji_events,
+                  onPressed: () => setState(
+                      () => _metric = LeaderboardMetric.topStreak),
+                ),
+                // Completion rate
+                _toggleButton(
+                  active: _metric == LeaderboardMetric.completionRate,
                   activeColor: checkColor,
                   icon: Icons.check_circle_outline,
-                  onPressed: () =>
-                      setState(() => showCheckRate = !showCheckRate),
-                ),
-                toggleButton(
-                  active: showTopStreak,
-                  activeColor: Colors.orange,
-                  icon: Icons.local_fire_department,
-                  onPressed: () =>
-                      setState(() => showTopStreak = !showTopStreak),
+                  onPressed: () => setState(
+                      () => _metric = LeaderboardMetric.completionRate),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 6),
 
-            // ── Horizontally scrollable bar chart ─────────────────────────
-            // Width = max(screen width, habitCount × 60 px) so that many habits
-            // trigger horizontal scroll while a small number fills the card.
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: chartWidth,
-                height: 180,
-                child: BarChart(
-                  BarChartData(
-                    maxY: maxY,
-                    alignment: BarChartAlignment.spaceAround,
-                    barTouchData: BarTouchData(enabled: false),
-                    gridData: FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                      drawHorizontalLine: true,
-                      horizontalInterval: maxY / 2,
-                      getDrawingHorizontalLine: (value) => FlLine(
-                        color: gridLineColor,
-                        strokeWidth: 1,
-                      ),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    titlesData: FlTitlesData(
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 22,
-                          getTitlesWidget: bottomTitle,
-                        ),
-                      ),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 32,
-                          interval: maxY / 2,
-                          getTitlesWidget: leftTitle,
-                        ),
-                      ),
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                    ),
-                    barGroups: buildBarGroups(),
-                  ),
-                  duration: const Duration(milliseconds: 150),
-                  curve: Curves.linear,
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-
-            // ── Legend ────────────────────────────────────────────────────
-            Wrap(
-              spacing: 16,
-              runSpacing: 4,
+            // ── Row 2: sort dropdown + optional category filter ────────────
+            Row(
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: checkColor,
-                        borderRadius: BorderRadius.circular(2),
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<LeaderboardSort>(
+                    value: _sort,
+                    isDense: true,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: LeaderboardSort.highestFirst,
+                        child: Text(S.of(context).leaderboardSortHighest),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      S.of(context).comparisonCheckRateLabel,
-                      style: TextStyle(fontSize: 10, color: muteColor),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(2),
+                      DropdownMenuItem(
+                        value: LeaderboardSort.lowestFirst,
+                        child: Text(S.of(context).leaderboardSortLowest),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      S.of(context).comparisonTopStreakLabel,
-                      style: TextStyle(fontSize: 10, color: muteColor),
-                    ),
-                  ],
+                      DropdownMenuItem(
+                        value: LeaderboardSort.byCategory,
+                        child: Text(S.of(context).leaderboardSortByCategory),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) setState(() => _sort = value);
+                    },
+                  ),
                 ),
+                if (widget.data.allCategoryTitles.isNotEmpty) ...[
+                  const SizedBox(width: 12),
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<String?>(
+                      value: _selectedCategory,
+                      isDense: true,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      items: [
+                        DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text(S.of(context).leaderboardFilterAll),
+                        ),
+                        ...widget.data.allCategoryTitles.map(
+                          (cat) => DropdownMenuItem<String?>(
+                            value: cat,
+                            child: Text(cat),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) =>
+                          setState(() => _selectedCategory = value),
+                    ),
+                  ),
+                ],
               ],
             ),
+            const SizedBox(height: 8),
+
+            // ── Habit rows (with dividers and optional category headers) ───
+            ...rowWidgets,
           ],
         ),
       ),

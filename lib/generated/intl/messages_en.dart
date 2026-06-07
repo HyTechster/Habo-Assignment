@@ -45,6 +45,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m11(error) => "Failed to save category: ${error}";
 
+  static String m17(count) => "${count} selected";
+
   static String m12(title) => "No habits in \"${title}\"";
 
   static String m13(current, target, unit) => "${current} / ${target} ${unit}";
@@ -55,6 +57,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m0(theme) =>
       "${Intl.select(theme, {'device': 'Device', 'light': 'Light', 'dark': 'Dark', 'oled': 'OLED black', 'materialYou': 'Material You', 'other': 'Device'})}";
+
+  static String m18(count) => "… +${count} more";
 
   static String m16(version) => "Version ${version}";
 
@@ -323,6 +327,24 @@ class MessageLookup extends MessageLookupByLibrary {
     "haboSyncLearnMore": MessageLookupByLibrary.simpleMessage(
       "Learn more at habo.space/sync",
     ),
+    "heatmapCategoryOther": MessageLookupByLibrary.simpleMessage("Other"),
+    "heatmapFilterApply": MessageLookupByLibrary.simpleMessage("Apply"),
+    "heatmapFilterCategories": MessageLookupByLibrary.simpleMessage(
+      "Categories",
+    ),
+    "heatmapFilterCategoryTitle": MessageLookupByLibrary.simpleMessage(
+      "Filter by category",
+    ),
+    "heatmapFilterClear": MessageLookupByLibrary.simpleMessage("Clear"),
+    "heatmapFilterEmpty": MessageLookupByLibrary.simpleMessage(
+      "No habits match the current filter",
+    ),
+    "heatmapFilterHabitTitle": MessageLookupByLibrary.simpleMessage(
+      "Filter by habit",
+    ),
+    "heatmapFilterHabits": MessageLookupByLibrary.simpleMessage("Habits"),
+    "heatmapFilterSelected": m17,
+    "heatmapFilterShowing": MessageLookupByLibrary.simpleMessage("Showing:"),
     "heatmapLegendLess": MessageLookupByLibrary.simpleMessage("Less"),
     "heatmapLegendMore": MessageLookupByLibrary.simpleMessage("More"),
     "heatmapLevelCompleted": MessageLookupByLibrary.simpleMessage("Completed"),
@@ -331,6 +353,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "heatmapLevelNoData": MessageLookupByLibrary.simpleMessage("No data"),
     "heatmapLevelSkipped": MessageLookupByLibrary.simpleMessage("Skipped"),
+    "heatmapNoCategory": MessageLookupByLibrary.simpleMessage("(No category)"),
     "ifYouWantToSupport": MessageLookupByLibrary.simpleMessage(
       "If you want to support Habo you can:",
     ),
@@ -339,6 +362,19 @@ class MessageLookup extends MessageLookupByLibrary {
       "Invalid backup file",
     ),
     "iris": MessageLookupByLibrary.simpleMessage("Iris"),
+    "leaderboardEmpty": MessageLookupByLibrary.simpleMessage(
+      "No habits in this category",
+    ),
+    "leaderboardFilterAll": MessageLookupByLibrary.simpleMessage("All"),
+    "leaderboardSortByCategory": MessageLookupByLibrary.simpleMessage(
+      "By category",
+    ),
+    "leaderboardSortHighest": MessageLookupByLibrary.simpleMessage(
+      "Highest first",
+    ),
+    "leaderboardSortLowest": MessageLookupByLibrary.simpleMessage(
+      "Lowest first",
+    ),
     "logYourDays": MessageLookupByLibrary.simpleMessage("Log your days"),
     "modify": MessageLookupByLibrary.simpleMessage("Modify"),
     "month": MessageLookupByLibrary.simpleMessage("Month"),
@@ -484,6 +520,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "warning": MessageLookupByLibrary.simpleMessage("Warning"),
     "week": MessageLookupByLibrary.simpleMessage("Week"),
+    "weeklyTrendAverage": MessageLookupByLibrary.simpleMessage("12-wk avg"),
+    "weeklyTrendFilterAll": MessageLookupByLibrary.simpleMessage("All habits"),
+    "weeklyTrendMoreHabits": m18,
+    "weeklyTrendNoCompletions": MessageLookupByLibrary.simpleMessage(
+      "No completions",
+    ),
+    "weeklyTrendThisWeek": MessageLookupByLibrary.simpleMessage("This week"),
     "weeklyTrendTitle": MessageLookupByLibrary.simpleMessage("12-Week Trend"),
     "whatsNewTitle": MessageLookupByLibrary.simpleMessage("What\'s New"),
     "whatsNewVersion": m16,

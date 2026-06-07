@@ -422,5 +422,99 @@
     "statisticsOverallTrends": "Overall Trends",
     "@statisticsOverallTrends": {
       "description": "Section header for the aggregate trends area in statistics"
+    },
+    "leaderboardSortHighest": "Highest first",
+    "@leaderboardSortHighest": {
+      "description": "Leaderboard sort option: highest metric value shown first"
+    },
+    "leaderboardSortLowest": "Lowest first",
+    "@leaderboardSortLowest": {
+      "description": "Leaderboard sort option: lowest metric value shown first"
+    },
+    "leaderboardSortByCategory": "By category",
+    "@leaderboardSortByCategory": {
+      "description": "Leaderboard sort option: habits grouped by category"
+    },
+    "leaderboardFilterAll": "All",
+    "@leaderboardFilterAll": {
+      "description": "Leaderboard category filter dropdown option: show all categories"
+    },
+    "leaderboardEmpty": "No habits in this category",
+    "@leaderboardEmpty": {
+      "description": "Shown in the leaderboard when the selected category filter has no matching habits"
+    },
+    "weeklyTrendThisWeek": "This week",
+    "@weeklyTrendThisWeek": {
+      "description": "Label for the stat box showing the current week's completion rate"
+    },
+    "weeklyTrendAverage": "12-wk avg",
+    "@weeklyTrendAverage": {
+      "description": "Label for the stat box showing the 12-week average completion rate"
+    },
+    "weeklyTrendFilterAll": "All habits",
+    "@weeklyTrendFilterAll": {
+      "description": "Category filter dropdown option in weekly trend card: show all habits"
+    },
+    "weeklyTrendNoCompletions": "No completions",
+    "@weeklyTrendNoCompletions": {
+      "description": "Tooltip line shown when no habits were completed in the tapped week"
+    },
+    "weeklyTrendMoreHabits": "… +{count} more",
+    "@weeklyTrendMoreHabits": {
+      "description": "Tooltip suffix showing how many habit titles were cut off (count = number hidden)",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "heatmapFilterCategoryTitle": "Filter by category",
+    "@heatmapFilterCategoryTitle": {
+      "description": "Title of the category filter dialog in the yearly heatmap card"
+    },
+    "heatmapNoCategory": "(No category)",
+    "@heatmapNoCategory": {
+      "description": "Checkbox label for habits that have no category assigned, inside the heatmap category filter dialog"
+    },
+    "heatmapFilterApply": "Apply",
+    "@heatmapFilterApply": {
+      "description": "Confirm button in the heatmap filter dialogs"
+    },
+    "heatmapFilterHabitTitle": "Filter by habit",
+    "@heatmapFilterHabitTitle": {
+      "description": "Title of the habit filter dialog in the yearly heatmap card"
+    },
+    "heatmapFilterCategories": "Categories",
+    "@heatmapFilterCategories": {
+      "description": "Label on the category filter button in the heatmap card when no filter is active"
+    },
+    "heatmapFilterHabits": "Habits",
+    "@heatmapFilterHabits": {
+      "description": "Label on the habit filter button in the heatmap card when no filter is active"
+    },
+    "heatmapFilterSelected": "{count} selected",
+    "@heatmapFilterSelected": {
+      "description": "Label on a filter button showing how many items are currently selected",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "heatmapFilterShowing": "Showing:",
+    "@heatmapFilterShowing": {
+      "description": "Prefix label for the active filter summary row in the heatmap card"
+    },
+    "heatmapFilterClear": "Clear",
+    "@heatmapFilterClear": {
+      "description": "Button to clear all active filters in the heatmap card"
+    },
+    "heatmapFilterEmpty": "No habits match the current filter",
+    "@heatmapFilterEmpty": {
+      "description": "Empty state message shown in the heatmap card when all habits are filtered out"
+    },
+    "heatmapCategoryOther": "Other",
+    "@heatmapCategoryOther": {
+      "description": "Section header label for habits that have no category assigned (used in heatmap and leaderboard)"
     }
   }
