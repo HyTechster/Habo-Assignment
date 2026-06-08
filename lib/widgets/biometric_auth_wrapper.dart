@@ -3,6 +3,7 @@ import 'package:habo/constants.dart';
 import 'package:habo/generated/l10n.dart';
 import 'package:habo/services/biometric_auth_service.dart';
 import 'package:habo/settings/settings_manager.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 
 class BiometricAuthWrapper extends StatefulWidget {
@@ -60,6 +61,15 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper>
   }
 
   Future<void> _initializeAuth() async {
+    // Snapshot the lock setting NOW, before any awaits.
+    // switchUser() can fire during the async gap below (e.g. when a Supabase
+    // session is restored right after launch), changing getBiometricLock from
+    // false → true mid-flight.  Using the value that was set when this widget
+    // was first built prevents a false lock screen for users who just signed in.
+    final settingsManager =
+        Provider.of<SettingsManager>(context, listen: false);
+    final bool lockEnabledAtStart = settingsManager.getBiometricLock;
+
     final available = await _biometricService.hasDeviceAuthentication();
     if (!mounted) return;
     final description =
@@ -71,12 +81,10 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper>
       _authDescription = description;
     });
 
-    // Only require authentication if biometric lock is enabled
-    if (_shouldRequireAuthentication()) {
-      // Don't auto-authenticate, let user trigger it manually
-      setState(() {
-        _isAuthenticated = false;
-      });
+    if (lockEnabledAtStart && available) {
+      // Trigger auth immediately — this surfaces noCredentialsSet right away
+      // and auto-bypasses without the user needing to tap a button.
+      await _authenticate();
     } else {
       setState(() {
         _isAuthenticated = true;
@@ -86,7 +94,6 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper>
 
   Future<void> _authenticate() async {
     if (_isAuthenticating) return;
-    debugPrint('BiometricAuthWrapper: Starting authentication');
 
     setState(() {
       _isAuthenticating = true;
@@ -99,20 +106,56 @@ class _BiometricAuthWrapperState extends State<BiometricAuthWrapper>
       );
 
       if (!mounted) return;
-      debugPrint('BiometricAuthWrapper: Authentication result: $authenticated');
+
+      if (authenticated) {
+        setState(() {
+          _isAuthenticated = true;
+          _isAuthenticating = false;
+        });
+        return;
+      }
+
+      // Auth returned false. Re-check whether device authentication is
+      // actually available — on some emulators isDeviceSupported() can
+      // flip between calls. If it is no longer available, lift the lock
+      // automatically so the user is never permanently stuck.
+      final bool stillAvailable =
+          await _biometricService.hasDeviceAuthentication();
+      if (!mounted) return;
+
+      if (!stillAvailable) {
+        setState(() {
+          _hasAuthenticationMethods = false;
+          _isAuthenticated = true;
+          _isAuthenticating = false;
+        });
+        return;
+      }
 
       setState(() {
-        _isAuthenticated = authenticated;
+        _isAuthenticated = false;
         _isAuthenticating = false;
       });
-
-      if (!authenticated) {
-        debugPrint(
-            'BiometricAuthWrapper: Authentication failed, showing retry dialog');
-        _showAuthenticationFailedDialog();
+      _showAuthenticationFailedDialog();
+    } on LocalAuthException catch (e) {
+      if (!mounted) return;
+      debugPrint('BiometricAuthWrapper: LocalAuthException - ${e.code}');
+      if (e.code == LocalAuthExceptionCode.noCredentialsSet) {
+        // Device has no PIN, pattern, or biometric enrolled at all.
+        // Disable the lock so the user is never stuck on restart either.
+        final settingsManager =
+            Provider.of<SettingsManager>(context, listen: false);
+        settingsManager.setBiometricLock = false;
+        setState(() {
+          _hasAuthenticationMethods = false;
+          _isAuthenticated = true;
+          _isAuthenticating = false;
+        });
       } else {
-        debugPrint(
-            'BiometricAuthWrapper: Authentication successful, user authenticated');
+        setState(() {
+          _isAuthenticating = false;
+        });
+        _showAuthenticationFailedDialog();
       }
     } catch (e) {
       if (!mounted) return;

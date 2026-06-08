@@ -17,12 +17,17 @@ class SettingsManager extends ChangeNotifier {
   SettingsData _settingsData = SettingsData();
   bool _isInitialized = false;
   String _currentAppVersion = '';
+  String? _userId;
+
+  String get _settingsKey =>
+      _userId != null ? 'habo_settings_$_userId' : 'habo_settings';
 
   late AudioSource _checkSource;
   late AudioSource _clickSource;
   bool _soundsLoaded = false;
 
-  Future<void> initialize() async {
+  Future<void> initialize({String? userId}) async {
+    _userId = userId;
     await loadData();
     try {
       final info = await PackageInfo.fromPlatform();
@@ -113,15 +118,27 @@ class SettingsManager extends ChangeNotifier {
 
   void saveData() async {
     final SharedPreferences prefs = await _prefs;
-    prefs.setString('habo_settings', jsonEncode(_settingsData));
+    prefs.setString(_settingsKey, jsonEncode(_settingsData));
   }
 
   Future<void> loadData() async {
     final SharedPreferences prefs = await _prefs;
-    String? json = prefs.getString('habo_settings');
-    if (json != null) {
-      _settingsData = SettingsData.fromJson(jsonDecode(json));
+    final String? json = prefs.getString(_settingsKey);
+    _settingsData = json != null
+        ? SettingsData.fromJson(jsonDecode(json))
+        : SettingsData();
+  }
+
+  /// Switch to a different user's settings.
+  /// Pass null on sign-out to reset to defaults without persisting.
+  Future<void> switchUser(String? userId) async {
+    _userId = userId;
+    if (userId == null) {
+      _settingsData = SettingsData(); // reset to defaults on sign-out
+    } else {
+      await loadData(); // load this user's saved settings (or defaults if first time)
     }
+    notifyListeners();
   }
 
   ThemeData get getDark {

@@ -14,7 +14,7 @@ import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as ffi;
 
 class HaboModel {
-  static const _dbVersion = 9;
+  static const _dbVersion = 10;
   Database? _db;
 
   Database get db {
@@ -27,9 +27,14 @@ class HaboModel {
 
   Future<void> deleteEvent(int id, DateTime dateTime) async {
     try {
+      // Match by date prefix so both "2026-06-04 ..." and "2026-06-04T..." formats
+      // are removed, preventing stale rows from lingering after format changes.
+      final dateStr = '${dateTime.year.toString().padLeft(4, '0')}'
+          '-${dateTime.month.toString().padLeft(2, '0')}'
+          '-${dateTime.day.toString().padLeft(2, '0')}';
       await db.delete('events',
-          where: 'id = ? AND dateTime = ?',
-          whereArgs: [id, dateTime.toString()]);
+          where: 'id = ? AND dateTime LIKE ?',
+          whereArgs: [id, '$dateStr%']);
     } catch (e) {
       if (kDebugMode) {
         debugPrint(e.toString());
@@ -50,8 +55,10 @@ class HaboModel {
 
   Future<void> emptyTables() async {
     try {
-      await db.delete('habits');
-      await db.delete('events');
+      await db.delete('habit_categories'); // clear junction before parents
+      await db.delete('habits');           // cascades to events
+      await db.delete('events');           // extra safety
+      await db.delete('categories');
     } catch (e) {
       if (kDebugMode) {
         debugPrint(e.toString());
@@ -392,6 +399,21 @@ class HaboModel {
     // Commit batch operations first
     await batch.commit();
 
+    // v9 → v10: remove duplicate event rows that accumulated when the pull code
+    // stored dateTime with a 'T' separator and insertEvent used a space separator,
+    // producing two rows with different PKs for the same (id, date).
+    // Keep only the row with the highest rowid (most recently inserted).
+    if (oldVersion < 10) {
+      await db.execute('''
+        DELETE FROM events
+        WHERE rowid NOT IN (
+          SELECT MAX(rowid)
+          FROM events
+          GROUP BY id, substr(dateTime, 1, 10)
+        )
+      ''');
+    }
+
     // Then handle fontFamily column addition separately (requires async check)
     if (oldVersion <= 7) {
       await _updateTableCategoriesAddFontFamily(db);
@@ -400,9 +422,20 @@ class HaboModel {
 
   Future<void> insertEvent(int id, DateTime date, List event) async {
     try {
+      final dateStr = '${date.year.toString().padLeft(4, '0')}'
+          '-${date.month.toString().padLeft(2, '0')}'
+          '-${date.day.toString().padLeft(2, '0')}';
+
+      // Remove any existing row for this (id, date) regardless of the exact
+      // dateTime format stored (space vs T separator) so we never accumulate
+      // duplicate rows that produce stale marks after a sign-out/sign-in cycle.
+      await db.delete('events',
+          where: 'id = ? AND dateTime LIKE ?',
+          whereArgs: [id, '$dateStr%']);
+
       final eventData = {
         'id': id,
-        'dateTime': date.toString(),
+        'dateTime': date.toString(), // canonical space format: "2026-06-04 00:00:00.000"
         'dayType': event[0].index,
         'comment': event[1],
       };
@@ -422,8 +455,7 @@ class HaboModel {
         eventData['targetValue'] = 0.0;
       }
 
-      db.insert('events', eventData,
-          conflictAlgorithm: ConflictAlgorithm.replace);
+      await db.insert('events', eventData);
     } catch (e) {
       if (kDebugMode) {
         debugPrint(e.toString());

@@ -3,6 +3,9 @@ import 'dart:io' show Platform;
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:habo/auth/auth_service.dart';
+import 'package:habo/auth/screens/account_screen.dart';
+import 'package:habo/auth/screens/sign_in_screen.dart';
 import 'package:habo/constants.dart';
 import 'package:habo/extensions.dart';
 import 'package:habo/generated/l10n.dart';
@@ -447,6 +450,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               },
                             ),
                           ],
+                        ),
+                      ),
+                      Consumer<AuthService>(
+                        builder: (context, auth, _) => ListTile(
+                          leading:
+                              const Icon(Icons.account_circle_outlined),
+                          title: Text(auth.isSignedIn
+                              ? auth.currentUser!.email ?? 'Account'
+                              : 'Sign in / Create account'),
+                          subtitle: Text(auth.isSignedIn
+                              ? 'Cloud sync enabled'
+                              : 'Tap to back up your data'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => auth.isSignedIn
+                                  ? const AccountScreen()
+                                  : const SignInScreen(),
+                            ),
+                          ),
                         ),
                       ),
                       ListTile(
