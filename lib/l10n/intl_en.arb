@@ -350,5 +350,171 @@
     "createCategory": "Create category",
     "all": "All",
     "selectIcon": "Pick an icon",
-    "searchIcons": "Search"
+    "searchIcons": "Search",
+    "heatmapLegendLess": "Less",
+    "@heatmapLegendLess": {
+      "description": "Heatmap legend label for the lower end of the activity scale"
+    },
+    "heatmapLegendMore": "More",
+    "@heatmapLegendMore": {
+      "description": "Heatmap legend label for the upper end of the activity scale"
+    },
+    "heatmapLevelNoData": "No data",
+    "@heatmapLevelNoData": {
+      "description": "Heatmap tap tooltip: no event was logged for this day"
+    },
+    "heatmapLevelSkipped": "Skipped",
+    "@heatmapLevelSkipped": {
+      "description": "Heatmap tap tooltip: habit was skipped on this day"
+    },
+    "heatmapLevelFailed": "Failed / Partial",
+    "@heatmapLevelFailed": {
+      "description": "Heatmap tap tooltip: habit was failed or only partially completed on this day"
+    },
+    "heatmapLevelCompleted": "Completed",
+    "@heatmapLevelCompleted": {
+      "description": "Heatmap tap tooltip: habit was fully completed on this day"
+    },
+    "weeklyTrendTitle": "12-Week Trend",
+    "@weeklyTrendTitle": {
+      "description": "Title of the 12-week completion rate trend card in statistics"
+    },
+    "habitComparisonTitle": "Habit Comparison",
+    "@habitComparisonTitle": {
+      "description": "Title of the per-habit comparison bar chart card in statistics"
+    },
+    "comparisonCheckRateLabel": "Check rate (scaled)",
+    "@comparisonCheckRateLabel": {
+      "description": "Legend label for the check-rate rod in the habit comparison chart"
+    },
+    "comparisonTopStreakLabel": "Top streak (days)",
+    "@comparisonTopStreakLabel": {
+      "description": "Legend label for the top-streak rod in the habit comparison chart"
+    },
+    "bestDayTimeTitle": "Best Day & Time",
+    "@bestDayTimeTitle": {
+      "description": "Title of the best day and best time summary card in statistics"
+    },
+    "bestDayLabel": "Best day: ",
+    "@bestDayLabel": {
+      "description": "Label prefix for the best day-of-week row (include trailing space)"
+    },
+    "bestTimeLabel": "Best time: ",
+    "@bestTimeLabel": {
+      "description": "Label prefix for the best time-of-day row (include trailing space)"
+    },
+    "notEnoughData": "Not enough data",
+    "@notEnoughData": {
+      "description": "Shown when fewer than 14 events exist to determine the best day of week"
+    },
+    "noNotificationsSet": "No notifications set",
+    "@noNotificationsSet": {
+      "description": "Shown when no habits have notification times configured"
+    },
+    "bestTimeDisclaimer": "Time is based on habit notification schedules.",
+    "@bestTimeDisclaimer": {
+      "description": "Disclaimer that best time is derived from notification settings, not event timestamps"
+    },
+    "statisticsPerHabit": "Per Habit",
+    "@statisticsPerHabit": {
+      "description": "Section header for the per-habit statistics area"
+    },
+    "statisticsOverallTrends": "Overall Trends",
+    "@statisticsOverallTrends": {
+      "description": "Section header for the aggregate trends area in statistics"
+    },
+    "leaderboardSortHighest": "Highest first",
+    "@leaderboardSortHighest": {
+      "description": "Leaderboard sort option: highest metric value shown first"
+    },
+    "leaderboardSortLowest": "Lowest first",
+    "@leaderboardSortLowest": {
+      "description": "Leaderboard sort option: lowest metric value shown first"
+    },
+    "leaderboardSortByCategory": "By category",
+    "@leaderboardSortByCategory": {
+      "description": "Leaderboard sort option: habits grouped by category"
+    },
+    "leaderboardFilterAll": "All",
+    "@leaderboardFilterAll": {
+      "description": "Leaderboard category filter dropdown option: show all categories"
+    },
+    "leaderboardEmpty": "No habits in this category",
+    "@leaderboardEmpty": {
+      "description": "Shown in the leaderboard when the selected category filter has no matching habits"
+    },
+    "weeklyTrendThisWeek": "This week",
+    "@weeklyTrendThisWeek": {
+      "description": "Label for the stat box showing the current week's completion rate"
+    },
+    "weeklyTrendAverage": "12-wk avg",
+    "@weeklyTrendAverage": {
+      "description": "Label for the stat box showing the 12-week average completion rate"
+    },
+    "weeklyTrendFilterAll": "All habits",
+    "@weeklyTrendFilterAll": {
+      "description": "Category filter dropdown option in weekly trend card: show all habits"
+    },
+    "weeklyTrendNoCompletions": "No completions",
+    "@weeklyTrendNoCompletions": {
+      "description": "Tooltip line shown when no habits were completed in the tapped week"
+    },
+    "weeklyTrendMoreHabits": "… +{count} more",
+    "@weeklyTrendMoreHabits": {
+      "description": "Tooltip suffix showing how many habit titles were cut off (count = number hidden)",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "heatmapFilterCategoryTitle": "Filter by category",
+    "@heatmapFilterCategoryTitle": {
+      "description": "Title of the category filter dialog in the yearly heatmap card"
+    },
+    "heatmapNoCategory": "(No category)",
+    "@heatmapNoCategory": {
+      "description": "Checkbox label for habits that have no category assigned, inside the heatmap category filter dialog"
+    },
+    "heatmapFilterApply": "Apply",
+    "@heatmapFilterApply": {
+      "description": "Confirm button in the heatmap filter dialogs"
+    },
+    "heatmapFilterHabitTitle": "Filter by habit",
+    "@heatmapFilterHabitTitle": {
+      "description": "Title of the habit filter dialog in the yearly heatmap card"
+    },
+    "heatmapFilterCategories": "Categories",
+    "@heatmapFilterCategories": {
+      "description": "Label on the category filter button in the heatmap card when no filter is active"
+    },
+    "heatmapFilterHabits": "Habits",
+    "@heatmapFilterHabits": {
+      "description": "Label on the habit filter button in the heatmap card when no filter is active"
+    },
+    "heatmapFilterSelected": "{count} selected",
+    "@heatmapFilterSelected": {
+      "description": "Label on a filter button showing how many items are currently selected",
+      "placeholders": {
+        "count": {
+          "type": "int"
+        }
+      }
+    },
+    "heatmapFilterShowing": "Showing:",
+    "@heatmapFilterShowing": {
+      "description": "Prefix label for the active filter summary row in the heatmap card"
+    },
+    "heatmapFilterClear": "Clear",
+    "@heatmapFilterClear": {
+      "description": "Button to clear all active filters in the heatmap card"
+    },
+    "heatmapFilterEmpty": "No habits match the current filter",
+    "@heatmapFilterEmpty": {
+      "description": "Empty state message shown in the heatmap card when all habits are filtered out"
+    },
+    "heatmapCategoryOther": "Other",
+    "@heatmapCategoryOther": {
+      "description": "Section header label for habits that have no category assigned (used in heatmap and leaderboard)"
+    }
   }

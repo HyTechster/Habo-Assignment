@@ -45,6 +45,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m11(error) => "Failed to save category: ${error}";
 
+  static String m17(count) => "${count} selected";
+
   static String m12(title) => "No habits in \"${title}\"";
 
   static String m13(current, target, unit) => "${current} / ${target} ${unit}";
@@ -55,6 +57,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m0(theme) =>
       "${Intl.select(theme, {'device': 'Device', 'light': 'Light', 'dark': 'Dark', 'oled': 'OLED black', 'materialYou': 'Material You', 'other': 'Device'})}";
+
+  static String m18(count) => "… +${count} more";
 
   static String m16(version) => "Version ${version}";
 
@@ -112,6 +116,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupFailedError": MessageLookupByLibrary.simpleMessage(
       "ERROR: Creating backup failed.",
     ),
+    "bestDayLabel": MessageLookupByLibrary.simpleMessage("Best day: "),
+    "bestDayTimeTitle": MessageLookupByLibrary.simpleMessage("Best Day & Time"),
+    "bestTimeDisclaimer": MessageLookupByLibrary.simpleMessage(
+      "Time is based on habit notification schedules.",
+    ),
+    "bestTimeLabel": MessageLookupByLibrary.simpleMessage("Best time: "),
     "biometric": MessageLookupByLibrary.simpleMessage("Biometric"),
     "biometricAuthenticationRequired": MessageLookupByLibrary.simpleMessage(
       "Biometric authentication required",
@@ -148,6 +158,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "categoryUpdatedSuccessfully": m7,
     "check": MessageLookupByLibrary.simpleMessage("Check"),
     "close": MessageLookupByLibrary.simpleMessage("Close"),
+    "comparisonCheckRateLabel": MessageLookupByLibrary.simpleMessage(
+      "Check rate (scaled)",
+    ),
+    "comparisonTopStreakLabel": MessageLookupByLibrary.simpleMessage(
+      "Top streak (days)",
+    ),
     "complete": MessageLookupByLibrary.simpleMessage("Complete"),
     "congratulationsReward": MessageLookupByLibrary.simpleMessage(
       "Congratulations! Your reward:",
@@ -275,6 +291,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "habit": MessageLookupByLibrary.simpleMessage("Habit"),
     "habitArchived": MessageLookupByLibrary.simpleMessage("Habit archived"),
+    "habitComparisonTitle": MessageLookupByLibrary.simpleMessage(
+      "Habit Comparison",
+    ),
     "habitContract": MessageLookupByLibrary.simpleMessage("Habit contract"),
     "habitContractDescription": MessageLookupByLibrary.simpleMessage(
       "While positive reinforcement is recommended, some people may opt for a habit contract. A habit contract allows you to specify a sanction that will be imposed if you miss your habit, and may involve an accountability partner who helps supervise your goals.",
@@ -308,6 +327,33 @@ class MessageLookup extends MessageLookupByLibrary {
     "haboSyncLearnMore": MessageLookupByLibrary.simpleMessage(
       "Learn more at habo.space/sync",
     ),
+    "heatmapCategoryOther": MessageLookupByLibrary.simpleMessage("Other"),
+    "heatmapFilterApply": MessageLookupByLibrary.simpleMessage("Apply"),
+    "heatmapFilterCategories": MessageLookupByLibrary.simpleMessage(
+      "Categories",
+    ),
+    "heatmapFilterCategoryTitle": MessageLookupByLibrary.simpleMessage(
+      "Filter by category",
+    ),
+    "heatmapFilterClear": MessageLookupByLibrary.simpleMessage("Clear"),
+    "heatmapFilterEmpty": MessageLookupByLibrary.simpleMessage(
+      "No habits match the current filter",
+    ),
+    "heatmapFilterHabitTitle": MessageLookupByLibrary.simpleMessage(
+      "Filter by habit",
+    ),
+    "heatmapFilterHabits": MessageLookupByLibrary.simpleMessage("Habits"),
+    "heatmapFilterSelected": m17,
+    "heatmapFilterShowing": MessageLookupByLibrary.simpleMessage("Showing:"),
+    "heatmapLegendLess": MessageLookupByLibrary.simpleMessage("Less"),
+    "heatmapLegendMore": MessageLookupByLibrary.simpleMessage("More"),
+    "heatmapLevelCompleted": MessageLookupByLibrary.simpleMessage("Completed"),
+    "heatmapLevelFailed": MessageLookupByLibrary.simpleMessage(
+      "Failed / Partial",
+    ),
+    "heatmapLevelNoData": MessageLookupByLibrary.simpleMessage("No data"),
+    "heatmapLevelSkipped": MessageLookupByLibrary.simpleMessage("Skipped"),
+    "heatmapNoCategory": MessageLookupByLibrary.simpleMessage("(No category)"),
     "ifYouWantToSupport": MessageLookupByLibrary.simpleMessage(
       "If you want to support Habo you can:",
     ),
@@ -316,6 +362,19 @@ class MessageLookup extends MessageLookupByLibrary {
       "Invalid backup file",
     ),
     "iris": MessageLookupByLibrary.simpleMessage("Iris"),
+    "leaderboardEmpty": MessageLookupByLibrary.simpleMessage(
+      "No habits in this category",
+    ),
+    "leaderboardFilterAll": MessageLookupByLibrary.simpleMessage("All"),
+    "leaderboardSortByCategory": MessageLookupByLibrary.simpleMessage(
+      "By category",
+    ),
+    "leaderboardSortHighest": MessageLookupByLibrary.simpleMessage(
+      "Highest first",
+    ),
+    "leaderboardSortLowest": MessageLookupByLibrary.simpleMessage(
+      "Lowest first",
+    ),
     "logYourDays": MessageLookupByLibrary.simpleMessage("Log your days"),
     "modify": MessageLookupByLibrary.simpleMessage("Modify"),
     "month": MessageLookupByLibrary.simpleMessage("Month"),
@@ -329,6 +388,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "There is no data about habits.",
     ),
     "noHabitsInCategory": m12,
+    "noNotificationsSet": MessageLookupByLibrary.simpleMessage(
+      "No notifications set",
+    ),
+    "notEnoughData": MessageLookupByLibrary.simpleMessage("Not enough data"),
     "notSoSuccessful": MessageLookupByLibrary.simpleMessage(
       "Not so successful",
     ),
@@ -420,6 +483,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "soundEffects": MessageLookupByLibrary.simpleMessage("Sound effects"),
     "sourceCode": MessageLookupByLibrary.simpleMessage("Source code (GitHub)"),
     "statistics": MessageLookupByLibrary.simpleMessage("Statistics"),
+    "statisticsOverallTrends": MessageLookupByLibrary.simpleMessage(
+      "Overall Trends",
+    ),
+    "statisticsPerHabit": MessageLookupByLibrary.simpleMessage("Per Habit"),
     "successful": MessageLookupByLibrary.simpleMessage("Successful"),
     "tapCheckLongPressMenu": MessageLookupByLibrary.simpleMessage(
       "Tap to check, long press for menu",
@@ -453,6 +520,14 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "warning": MessageLookupByLibrary.simpleMessage("Warning"),
     "week": MessageLookupByLibrary.simpleMessage("Week"),
+    "weeklyTrendAverage": MessageLookupByLibrary.simpleMessage("12-wk avg"),
+    "weeklyTrendFilterAll": MessageLookupByLibrary.simpleMessage("All habits"),
+    "weeklyTrendMoreHabits": m18,
+    "weeklyTrendNoCompletions": MessageLookupByLibrary.simpleMessage(
+      "No completions",
+    ),
+    "weeklyTrendThisWeek": MessageLookupByLibrary.simpleMessage("This week"),
+    "weeklyTrendTitle": MessageLookupByLibrary.simpleMessage("12-Week Trend"),
     "whatsNewTitle": MessageLookupByLibrary.simpleMessage("What\'s New"),
     "whatsNewVersion": m16,
     "yourCommentHere": MessageLookupByLibrary.simpleMessage("Your note here"),

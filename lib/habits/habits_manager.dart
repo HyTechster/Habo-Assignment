@@ -418,6 +418,13 @@ class HabitsManager extends ChangeNotifier {
     }
   }
 
+  /// Returns fully-populated [AllStatistics] for the Statistics screen.
+  ///
+  /// Passes [allHabits] unfiltered — this includes archived habits, which
+  /// therefore appear in heatmaps and weekly trend data. The comparison
+  /// sub-calculation ([Statistics.calculateComparison]) filters archived habits
+  /// internally, so [AllStatistics.comparison] only covers active habits.
+  /// Do not remove the archive filter inside calculateComparison.
   Future<AllStatistics> getFutureStatsData() async {
     return await Statistics.calculateStatistics(allHabits);
   }

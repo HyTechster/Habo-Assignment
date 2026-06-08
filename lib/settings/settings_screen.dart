@@ -1,12 +1,14 @@
 import 'dart:io' show Platform;
 
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:habo/auth/auth_service.dart';
 import 'package:habo/auth/screens/account_screen.dart';
 import 'package:habo/auth/screens/sign_in_screen.dart';
 import 'package:habo/constants.dart';
+import 'package:habo/debug/dummy_data_seeder.dart';
 import 'package:habo/extensions.dart';
 import 'package:habo/friends/my_profile_screen.dart';
 import 'package:habo/generated/l10n.dart';
@@ -683,6 +685,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           );
                         },
                       ),
+                      // Debug-only tile — hidden in release builds.
+                      if (kDebugMode) ...[
+                        const Divider(),
+                        ListTile(
+                          leading: const Icon(Icons.science_outlined,
+                              color: Colors.orange),
+                          title: const Text(
+                            'Seed test data (debug)',
+                            style: TextStyle(color: Colors.orange),
+                          ),
+                          subtitle: const Text(
+                            'Creates 10 habits (checkable & progressive) + fills the year with events',
+                          ),
+                          onTap: () async {
+                            final manager = Provider.of<HabitsManager>(
+                                context,
+                                listen: false);
+                            await DummyDataSeeder.seed(manager);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Test data seeded!'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
                       SizedBox(height: 56),
                     ],
                   ),
