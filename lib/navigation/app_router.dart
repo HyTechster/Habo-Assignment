@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:habo/friends/activity_screen.dart';
+import 'package:habo/friends/friends_list_screen.dart';
 import 'package:habo/habits/edit_habit_screen.dart';
 import 'package:habo/habits/habits_manager.dart';
 import 'package:habo/habits/habits_screen.dart';
@@ -52,6 +54,8 @@ class AppRouter extends RouterDelegate<HaboRouteConfiguration>
       onDidRemovePage: _handleDidRemovePage,
       pages: [
         if (allInitialized()) HabitsScreen.page(),
+        if (appStateManager.getFriends) FriendsListScreen.page(),
+        if (appStateManager.getActivity) ActivityScreen.page(),
         if (appStateManager.getStatistics) StatisticsScreen.page(),
         if (appStateManager.getSettings) SettingsScreen.page(),
         if (appStateManager.getWhatsNew || _shouldShowWhatsNew())
@@ -74,6 +78,14 @@ class AppRouter extends RouterDelegate<HaboRouteConfiguration>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (page.name == Routes.statisticsPath) {
         appStateManager.goStatistics(false);
+      }
+
+      if (page.name == Routes.friendsPath) {
+        appStateManager.goFriends(false);
+      }
+
+      if (page.name == Routes.activityPath) {
+        appStateManager.goActivity(false);
       }
 
       if (page.name == Routes.settingsPath) {
@@ -113,6 +125,12 @@ class AppRouter extends RouterDelegate<HaboRouteConfiguration>
     // Return current route configuration based on app state
     if (appStateManager.getStatistics) {
       return const HaboRouteConfiguration(path: '/statistics');
+    }
+    if (appStateManager.getFriends) {
+      return const HaboRouteConfiguration(path: '/friends');
+    }
+    if (appStateManager.getActivity) {
+      return const HaboRouteConfiguration(path: '/activity');
     }
     if (appStateManager.getSettings) {
       return const HaboRouteConfiguration(path: '/settings');
@@ -156,11 +174,16 @@ class AppRouter extends RouterDelegate<HaboRouteConfiguration>
       appStateManager.goOnboarding(false);
       appStateManager.goWhatsNew(false);
       appStateManager.goEditHabit(null);
+      appStateManager.goFriends(false);
+      appStateManager.goActivity(false);
 
       // Navigate based on the URL path
       switch (normalizedPath) {
         case '/statistics':
           appStateManager.goStatistics(true);
+          break;
+        case '/friends':
+          appStateManager.goFriends(true);
           break;
         case '/settings':
           appStateManager.goSettings(true);

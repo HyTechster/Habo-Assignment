@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:habo/auth/auth_service.dart';
 import 'package:habo/constants.dart';
+import 'package:habo/friends/friends_manager.dart';
+import 'package:habo/friends/widgets/habit_visibility_eye_button.dart';
 import 'package:habo/generated/l10n.dart';
 import 'package:habo/habits/habit.dart';
 import 'package:habo/habits/habits_manager.dart';
@@ -36,6 +39,17 @@ class HabitHeader extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
+        ),
+        // Only shown when signed in AND the user is in "choose individually"
+        // visibility mode — in "share all" mode every habit is summarized
+        // for friends already, so a per-habit toggle would be misleading.
+        Consumer2<AuthService, FriendsManager>(
+          builder: (context, authService, friendsManager, _) {
+            if (!authService.isSignedIn || friendsManager.shareAllHabits) {
+              return const SizedBox.shrink();
+            }
+            return HabitVisibilityEyeButton(localHabitId: widget.habitData.id!);
+          },
         ),
         IconButton(
           padding: const EdgeInsets.fromLTRB(3, 0, 0, 0),

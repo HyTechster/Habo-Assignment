@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:habo/auth/auth_service.dart';
+import 'package:habo/friends/friends_manager.dart';
 import 'package:habo/habits/habits_manager.dart';
 import 'package:habo/notifications.dart';
 import 'package:habo/services/service_locator.dart';
@@ -68,6 +69,7 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
   late AppRouter _appRouter;
   late AuthService _authService;
   late SyncService _syncService;
+  late FriendsManager _friendsManager;
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
   bool _isInitialized = false;
@@ -177,6 +179,7 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
       onDataChanged: habitsManager.initialize,
       settingsManager: _settingsManager,
     );
+    final friendsManager = FriendsManager(authService);
 
     // Push to cloud immediately after any local habit change.
     // _isSyncing guard in syncIfReady() prevents overlapping syncs.
@@ -185,6 +188,7 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
     setState(() {
       _authService = authService;
       _syncService = syncService;
+      _friendsManager = friendsManager;
       _habitManager = habitsManager;
       _appRouter = appRouter;
       _isInitialized = true;
@@ -240,6 +244,9 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
         ),
         ChangeNotifierProvider<SyncService>(
           create: (context) => _syncService,
+        ),
+        ChangeNotifierProvider<FriendsManager>(
+          create: (context) => _friendsManager,
         ),
       ],
       child: Consumer<SettingsManager>(builder: (context, settingsManager, _) {
