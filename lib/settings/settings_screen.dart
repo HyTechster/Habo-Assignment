@@ -8,6 +8,7 @@ import 'package:habo/auth/screens/account_screen.dart';
 import 'package:habo/auth/screens/sign_in_screen.dart';
 import 'package:habo/constants.dart';
 import 'package:habo/extensions.dart';
+import 'package:habo/friends/my_profile_screen.dart';
 import 'package:habo/generated/l10n.dart';
 import 'package:habo/habits/habits_manager.dart';
 import 'package:habo/navigation/app_state_manager.dart';
@@ -149,6 +150,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Center(
                   child: Column(
                     children: <Widget>[
+                      // Signed-out users haven't backed up their data yet —
+                      // surface the prompt to sign in/create an account right
+                      // at the top, ahead of every other setting.
+                      if (!Provider.of<AuthService>(context).isSignedIn)
+                        ListTile(
+                          leading: const Icon(Icons.account_circle_outlined),
+                          title: const Text('Sign in / Create account'),
+                          subtitle: const Text('Tap to back up your data'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SignInScreen(),
+                            ),
+                          ),
+                        ),
+                      // Username/profile and the account entry only make
+                      // sense once signed in — social features are entirely
+                      // opt-in (see E4). Account sits directly below Profile.
+                      if (Provider.of<AuthService>(context).isSignedIn) ...[
+                        ListTile(
+                          leading: const Icon(Icons.badge_outlined),
+                          title: const Text('Profile'),
+                          subtitle: const Text(
+                              'Set the username your friends see'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const MyProfileScreen(),
+                            ),
+                          ),
+                        ),
+                        Consumer<AuthService>(
+                          builder: (context, auth, _) => ListTile(
+                            leading:
+                                const Icon(Icons.account_circle_outlined),
+                            title: Text(auth.currentUser?.email ?? 'Account'),
+                            subtitle: const Text('Cloud sync enabled'),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const AccountScreen(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                       ListTile(
                         title: Text(S.of(context).theme),
                         trailing: DropdownButton<Themes>(
@@ -450,27 +500,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               },
                             ),
                           ],
-                        ),
-                      ),
-                      Consumer<AuthService>(
-                        builder: (context, auth, _) => ListTile(
-                          leading:
-                              const Icon(Icons.account_circle_outlined),
-                          title: Text(auth.isSignedIn
-                              ? auth.currentUser!.email ?? 'Account'
-                              : 'Sign in / Create account'),
-                          subtitle: Text(auth.isSignedIn
-                              ? 'Cloud sync enabled'
-                              : 'Tap to back up your data'),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => auth.isSignedIn
-                                  ? const AccountScreen()
-                                  : const SignInScreen(),
-                            ),
-                          ),
                         ),
                       ),
                       ListTile(

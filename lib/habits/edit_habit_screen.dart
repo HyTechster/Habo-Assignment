@@ -1,6 +1,8 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:habo/auth/auth_service.dart';
 import 'package:habo/constants.dart';
+import 'package:habo/friends/friends_manager.dart';
 import 'package:habo/generated/l10n.dart';
 import 'package:habo/habits/habits_manager.dart';
 import 'package:habo/model/habit_data.dart';
@@ -51,6 +53,13 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
   bool showSanction = false;
   HabitType habitType = HabitType.boolean;
   List<Category> selectedCategories = [];
+
+  // E4 — Social Friend Features: opt-in per-habit sharing.
+  // `_sharedCloudHabitId` is null until we resolve the habit's cloud uuid
+  // (it requires the habit to have already been synced at least once).
+  bool _isShared = false;
+  bool _shareLoading = false;
+  String? _sharedCloudHabitId;
 
   Future<void> setNotificationTime(BuildContext context) async {
     TimeOfDay? selectedTime;
@@ -181,7 +190,61 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
     // Load categories when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<HabitsManager>(context, listen: false).loadCategories();
+      _loadShareState();
     });
+  }
+
+  /// Resolves whether this (already-existing, already-synced) habit is
+  /// currently shared with friends. Sharing is only possible for signed-in
+  /// users editing a habit that has a cloud counterpart — new/unsynced
+  /// habits simply don't show the toggle yet.
+  Future<void> _loadShareState() async {
+    final habitId = widget.habitData?.id;
+    if (habitId == null) return;
+    final authService = Provider.of<AuthService>(context, listen: false);
+    if (!authService.isSignedIn) return;
+
+    final friendsManager = Provider.of<FriendsManager>(context, listen: false);
+    setState(() => _shareLoading = true);
+    try {
+      final cloudId = await friendsManager.cloudHabitIdForLocalId(habitId);
+      if (!mounted) return;
+      if (cloudId != null) {
+        final shared = await friendsManager.isHabitShared(cloudId);
+        if (!mounted) return;
+        setState(() {
+          _sharedCloudHabitId = cloudId;
+          _isShared = shared;
+        });
+      }
+    } catch (_) {
+      // Offline or not yet synced — leave the toggle hidden, no error shown
+      // since this is a best-effort enhancement, not core functionality.
+    } finally {
+      if (mounted) setState(() => _shareLoading = false);
+    }
+  }
+
+  /// Flips the share flag immediately (it takes effect the moment it's
+  /// toggled — no separate "save" step — so friends see/lose access to the
+  /// habit right away, matching the "immediately hidden when disabled"
+  /// requirement).
+  Future<void> _toggleShare(bool value) async {
+    final cloudId = _sharedCloudHabitId;
+    if (cloudId == null) return;
+    final friendsManager = Provider.of<FriendsManager>(context, listen: false);
+    setState(() {
+      _isShared = value;
+      _shareLoading = true;
+    });
+    try {
+      await friendsManager.setHabitShared(cloudId, value);
+    } catch (_) {
+      // Revert on failure (e.g. offline) so the UI reflects reality.
+      if (mounted) setState(() => _isShared = !value);
+    } finally {
+      if (mounted) setState(() => _shareLoading = false);
+    }
   }
 
   @override
@@ -520,6 +583,32 @@ class _EditHabitScreenState extends State<EditHabitScreen> {
                         ],
                       ),
                     ),
+
+                    // E4 — Social: opt-in habit sharing toggle. Only shown
+                    // for an existing, already-synced habit while signed in —
+                    // sharing requires a cloud counterpart to attach to.
+                    if (_sharedCloudHabitId != null)
+                      ListTile(
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 25),
+                        title: const Text('Share with friends'),
+                        subtitle: Text(
+                          _isShared
+                              ? 'Friends can see this habit\'s streak and progress'
+                              : 'Hidden from friends',
+                          style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                        ),
+                        trailing: _shareLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : Switch(
+                                value: _isShared,
+                                onChanged: _toggleShare,
+                              ),
+                      ),
 
                     // Categories Section (conditionally shown)
                     Consumer<SettingsManager>(

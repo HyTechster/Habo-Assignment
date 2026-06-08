@@ -34,6 +34,51 @@ Currently available on the Play Store, IzzyOnDroid, and App Store.
 
 
 
+## Social Features
+
+Signed-in users (see Cloud Sync) can optionally connect with friends to stay
+accountable together. Everything here is opt-in and requires an account —
+people who use Habo without signing in see no change to their experience.
+
+- **Friends tab** — appears in the main app bar once you're signed in, with:
+  - **Friends List** — your accepted friends and a summary of their shared habit streaks
+  - **Friend Requests** — accept or reject incoming requests, or cancel ones you've sent
+  - **Search Users** — find people by username and send a friend request
+  - **Friend Profile** — a read-only view of a friend's *shared* habits, including
+    current streak and completion progress, with a "Send Nudge" button per habit
+- **Habit visibility mode** — set from Settings → Profile, this controls what
+  gets summarized for friends:
+  - **All habits** — every (non-archived) habit you have is summarized for
+    friends automatically.
+  - **Chosen habits** — only habits you individually opt in are visible. While
+    this mode is active, every habit in your list shows an eye icon you can
+    tap to show or hide that habit from friends; habits are shown by default.
+    (The same toggle is also available as a "Share with friends" switch in the
+    habit's edit screen.)
+  No habit is ever visible to anyone unless your visibility settings allow it.
+- **Nudges** — friends can send each other a gentle reminder about a shared
+  habit, delivered as a local notification. To prevent spam, each friend can
+  nudge you about a given habit at most once per day.
+- **Social tab** — a bottom navigation bar (Home | Social) appears once
+  you're signed in, splitting into two sub-tabs:
+  - **My Habits** — your own habits with their streak, plus how many friends
+    reacted and a button to open the comment thread — so you can see who's
+    cheering you on without leaving the Social tab.
+  - **Friends** — a feed combining every friend's visible habits (multiple
+    habits from the same friend are grouped under one card) with their
+    current streak and completion progress, where you can:
+    - **React** — toggle a heart on a habit to cheer a friend on (one per person per habit)
+    - **Comment** — open a habit's comment thread and leave encouragement
+- **Activity** — a bell icon in the main app bar (next to Friends) shows you
+  who's reacted to or commented on *your* habits, newest first, with a small
+  badge when there's something new you haven't seen yet.
+
+All social data is stored in Supabase and protected by Row Level Security —
+the database itself enforces that you can only read your own data, your
+friends' public profiles, and habits that have explicitly been shared with
+you (see `supabase/migrations/003_e4_friends.sql`). The rest of the app,
+including all of your personal habit data, continues to work fully offline.
+
 ## Contributing
 
 We welcome contributions from the community to help make Habo even better! Whether you're a developer, designer, or just an enthusiastic user, there are many ways you can help. 

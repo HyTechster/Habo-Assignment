@@ -1,10 +1,13 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:habo/auth/auth_service.dart';
 import 'package:habo/constants.dart';
 import 'package:habo/generated/l10n.dart';
 import 'package:habo/notifications.dart';
 import 'package:provider/provider.dart';
+import 'package:habo/friends/friends_manager.dart';
+import 'package:habo/friends/social_feed_screen.dart';
 import 'package:habo/habits/calendar_column.dart';
 import 'package:habo/habits/habits_manager.dart';
 import 'package:habo/settings/settings_manager.dart';
@@ -28,6 +31,11 @@ class HabitsScreen extends StatefulWidget {
 }
 
 class _HabitsScreenState extends State<HabitsScreen> {
+  /// 0 = Home (habits list), 1 = Social (friends' habit feed). The Social
+  /// tab is opt-in social functionality, so it (and the bar itself) only
+  /// appears for signed-in users — see _showSocialTab below.
+  int _selectedTab = 0;
+
   @override
   void initState() {
     super.initState();
@@ -100,14 +108,63 @@ class _HabitsScreenState extends State<HabitsScreen> {
         appStateManager,
         child,
       ) {
+        // The Social tab is opt-in social functionality — unauthenticated
+        // users must see zero changes to their experience, so the bottom
+        // bar (and the feed it leads to) is absent entirely until signed in.
+        final showSocialTab = Provider.of<AuthService>(context).isSignedIn;
+        final selectedTab = showSocialTab ? _selectedTab : 0;
+        final showingSocial = showSocialTab && selectedTab == 1;
+
         return Scaffold(
           appBar: AppBar(
-            title: const Text(
-              'Habo',
-              style: TextStyle(fontWeight: FontWeight.w700),
+            title: Text(
+              showingSocial ? 'Social' : 'Habo',
+              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             backgroundColor: Colors.transparent,
             actions: <Widget>[
+              // Friends tab is opt-in social functionality — unauthenticated
+              // users must see zero changes to their experience, so the icon
+              // is hidden entirely unless the user is signed in.
+              if (Provider.of<AuthService>(context).isSignedIn)
+                IconButton(
+                  icon: Icon(
+                    Icons.people_outline,
+                    semanticLabel: 'Friends',
+                  ),
+                  color: Colors.grey[400],
+                  tooltip: 'Friends',
+                  onPressed: () {
+                    Provider.of<HabitsManager>(context, listen: false)
+                        .hideSnackBar();
+                    Provider.of<AppStateManager>(context, listen: false)
+                        .goFriends(true);
+                  },
+                ),
+              // "Where can I see that a friend liked/commented on my habit?"
+              // — this bell is the answer. Badged with a dot when there's
+              // activity newer than the last time the user opened it.
+              if (Provider.of<AuthService>(context).isSignedIn)
+                Consumer<FriendsManager>(
+                  builder: (context, friendsManager, _) => IconButton(
+                    icon: Badge(
+                      isLabelVisible: friendsManager.hasUnseenActivity,
+                      smallSize: 8,
+                      child: Icon(
+                        Icons.notifications_outlined,
+                        semanticLabel: 'Activity',
+                      ),
+                    ),
+                    color: Colors.grey[400],
+                    tooltip: 'Activity',
+                    onPressed: () {
+                      Provider.of<HabitsManager>(context, listen: false)
+                          .hideSnackBar();
+                      Provider.of<AppStateManager>(context, listen: false)
+                          .goActivity(true);
+                    },
+                  ),
+                ),
               IconButton(
                 icon: Icon(
                   Icons.archive,
@@ -151,20 +208,48 @@ class _HabitsScreenState extends State<HabitsScreen> {
               ),
             ],
           ),
-          body: const CalendarColumn(),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Provider.of<AppStateManager>(context, listen: false)
-                  .goCreateHabit(true);
-              Provider.of<HabitsManager>(context, listen: false).hideSnackBar();
-            },
-            child: Icon(
-              Icons.add,
-              color: Colors.white,
-              semanticLabel: S.of(context).add,
-              size: 35.0,
-            ),
-          ),
+          body: showingSocial ? const SocialFeedScreen() : const CalendarColumn(),
+          // Adding a habit only makes sense on the Home tab — the Social
+          // feed is a read/react/comment view onto friends' habits.
+          floatingActionButton: showingSocial
+              ? null
+              : FloatingActionButton(
+                  onPressed: () {
+                    Provider.of<AppStateManager>(context, listen: false)
+                        .goCreateHabit(true);
+                    Provider.of<HabitsManager>(context, listen: false)
+                        .hideSnackBar();
+                  },
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.white,
+                    semanticLabel: S.of(context).add,
+                    size: 35.0,
+                  ),
+                ),
+          bottomNavigationBar: showSocialTab
+              ? BottomNavigationBar(
+                  currentIndex: selectedTab,
+                  onTap: (index) {
+                    if (index == selectedTab) return;
+                    Provider.of<HabitsManager>(context, listen: false)
+                        .hideSnackBar();
+                    setState(() => _selectedTab = index);
+                  },
+                  items: const [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home_outlined),
+                      activeIcon: Icon(Icons.home),
+                      label: 'Home',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.groups_outlined),
+                      activeIcon: Icon(Icons.groups),
+                      label: 'Social',
+                    ),
+                  ],
+                )
+              : null,
         );
       },
     );
