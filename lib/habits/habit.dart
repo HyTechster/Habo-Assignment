@@ -351,11 +351,15 @@ class HabitState extends State<Habit> {
                   );
                 },
                 markerBuilder: (context, date, events) {
-                  if (events.isNotEmpty) {
-                    return _buildEventsMarker(date, events);
-                  } else {
-                    return null;
+                  final isMonthStart = date.day == 1;
+                  if (events.isNotEmpty || isMonthStart) {
+                    return _buildEventsMarker(
+                      date,
+                      events,
+                      isMonthStart: isMonthStart,
+                    );
                   }
+                  return null;
                 },
               ),
             ),
@@ -365,41 +369,68 @@ class HabitState extends State<Habit> {
     );
   }
 
-  Widget _buildEventsMarker(DateTime date, List events) {
+  Widget _buildEventsMarker(DateTime date, List events,
+      {bool isMonthStart = false}) {
+    final hasEvent = events.isNotEmpty && events[0] != DayType.clear;
+    final hasComment =
+        events.isNotEmpty && events[1] != null && events[1] != '';
+
     return AspectRatio(
       aspectRatio: 1,
       child: IgnorePointer(
-        child: Stack(children: [
-          (events[0] != DayType.clear)
-              ? Container(
-                  margin: const EdgeInsets.all(4.0),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: _getEventColor(events),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: _getEventIcon(events),
-                )
-              : Container(),
-          (events[1] != null && events[1] != '')
-              ? Container(
-                  alignment: const Alignment(1.0, 1.0),
-                  padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 2.0),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(15.0),
-                    elevation: 1,
-                    child: Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: HaboColors.orange,
-                        shape: BoxShape.circle,
-                      ),
+        child: Stack(
+          children: [
+            if (hasEvent)
+              Container(
+                margin: const EdgeInsets.all(4.0),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: _getEventColor(events),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: _getEventIcon(events),
+              ),
+            if (hasComment)
+              Container(
+                alignment: const Alignment(1.0, 1.0),
+                padding: const EdgeInsets.fromLTRB(0, 0, 5.0, 2.0),
+                child: Material(
+                  borderRadius: BorderRadius.circular(15.0),
+                  elevation: 1,
+                  child: Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                      color: HaboColors.orange,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                )
-              : Container(),
-        ]),
+                ),
+              ),
+            if (isMonthStart)
+              Positioned(
+                top: 5,
+                left: 6,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: HaboColors.primary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    DateFormat('MMM', Intl.getCurrentLocale()).format(date),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w700,
+                      height: 1.0,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

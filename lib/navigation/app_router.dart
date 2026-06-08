@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:habo/habits/edit_habit_screen.dart';
 import 'package:habo/habits/habits_manager.dart';
 import 'package:habo/habits/habits_screen.dart';
+import 'package:habo/help/help_screen.dart';
 import 'package:habo/navigation/app_state_manager.dart';
 import 'package:habo/navigation/routes.dart';
 import 'package:habo/navigation/route_information_parser.dart';
@@ -54,6 +55,7 @@ class AppRouter extends RouterDelegate<HaboRouteConfiguration>
         if (allInitialized()) HabitsScreen.page(),
         if (appStateManager.getStatistics) StatisticsScreen.page(),
         if (appStateManager.getSettings) SettingsScreen.page(),
+        if (appStateManager.getHelp) HelpScreen.page(),
         if (appStateManager.getWhatsNew || _shouldShowWhatsNew())
           WhatsNewScreen.page(),
         if (appStateManager.getOnboarding || !settingsManager.getSeenOnboarding)
@@ -78,6 +80,10 @@ class AppRouter extends RouterDelegate<HaboRouteConfiguration>
 
       if (page.name == Routes.settingsPath) {
         appStateManager.goSettings(false);
+      }
+
+      if (page.name == Routes.helpPath) {
+        appStateManager.goHelp(false);
       }
 
       if (page.name == Routes.onboardingPath) {

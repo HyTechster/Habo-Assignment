@@ -404,6 +404,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   .checkColor,
                               icon: Icons.check,
                               defaultColor: HaboColors.primary,
+                              tooltip: S.of(context).check,
                               onPicked: (value) {
                                 Provider.of<SettingsManager>(context,
                                         listen: false)
@@ -416,6 +417,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   .progressColor,
                               icon: Icons.trending_up,
                               defaultColor: HaboColors.progress,
+                              tooltip: S.of(context).progress,
                               onPicked: (value) {
                                 Provider.of<SettingsManager>(context,
                                         listen: false)
@@ -428,6 +430,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   .failColor,
                               icon: Icons.close,
                               defaultColor: HaboColors.red,
+                              tooltip: S.of(context).fail,
                               onPicked: (value) {
                                 Provider.of<SettingsManager>(context,
                                         listen: false)
@@ -440,6 +443,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   .skipColor,
                               icon: Icons.last_page,
                               defaultColor: HaboColors.skip,
+                              tooltip: S.of(context).skip,
                               onPicked: (value) {
                                 Provider.of<SettingsManager>(context,
                                         listen: false)
@@ -483,6 +487,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ],
                         ),
+                      ),
+                      ListTile(
+                        title: const Text('Help'),
+                        leading: const Icon(Icons.help_outline_rounded),
+                        onTap: () {
+                          Provider.of<AppStateManager>(context, listen: false)
+                              .goHelp(true);
+                        },
                       ),
                       ListTile(
                         title: Text(S.of(context).onboarding),

@@ -136,6 +136,20 @@ class _HabitsScreenState extends State<HabitsScreen> {
                 },
               ),
               IconButton(
+                icon: const Icon(
+                  Icons.help_outline_rounded,
+                  semanticLabel: 'Help',
+                ),
+                color: Colors.grey[400],
+                tooltip: 'Help',
+                onPressed: () {
+                  Provider.of<AppStateManager>(context, listen: false)
+                      .goHelp(true);
+                  Provider.of<HabitsManager>(context, listen: false)
+                      .hideSnackBar();
+                },
+              ),
+              IconButton(
                 icon: Icon(
                   Icons.settings,
                   semanticLabel: S.of(context).settings,
@@ -153,6 +167,7 @@ class _HabitsScreenState extends State<HabitsScreen> {
           ),
           body: const CalendarColumn(),
           floatingActionButton: FloatingActionButton(
+            tooltip: S.of(context).add,
             onPressed: () {
               Provider.of<AppStateManager>(context, listen: false)
                   .goCreateHabit(true);

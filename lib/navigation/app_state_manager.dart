@@ -7,6 +7,7 @@ class AppStateManager extends ChangeNotifier {
   bool _onboarding = false;
   bool _whatsNew = false;
   bool _createHabit = false;
+  bool _help = false;
   HabitData? _editHabit;
 
   bool get getStatistics => _statistics;
@@ -14,6 +15,7 @@ class AppStateManager extends ChangeNotifier {
   bool get getOnboarding => _onboarding;
   bool get getWhatsNew => _whatsNew;
   bool get getCreateHabit => _createHabit;
+  bool get getHelp => _help;
   HabitData? get getEditHabit => _editHabit;
 
   void goStatistics(bool state) {
@@ -33,6 +35,11 @@ class AppStateManager extends ChangeNotifier {
 
   void goWhatsNew(bool state) {
     _whatsNew = state;
+    notifyListeners();
+  }
+
+  void goHelp(bool state) {
+    _help = state;
     notifyListeners();
   }
 
