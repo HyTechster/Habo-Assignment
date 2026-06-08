@@ -160,18 +160,18 @@ class HabitsManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addEvent(int id, DateTime dateTime, List event) {
-    _eventRepository.insertEvent(id, dateTime, event);
+  Future<void> addEvent(int id, DateTime dateTime, List event) async {
+    await _eventRepository.insertEvent(id, dateTime, event);
     _notificationService?.handleHabitEventAdded(id, dateTime, event);
-    // Update home widget after event is added
     _updateHomeWidgetAsync();
+    notifyListeners();
   }
 
-  void deleteEvent(int id, DateTime dateTime) {
-    _eventRepository.deleteEvent(id, dateTime);
+  Future<void> deleteEvent(int id, DateTime dateTime) async {
+    await _eventRepository.deleteEvent(id, dateTime);
     _notificationService?.handleHabitEventDeleted(id, dateTime);
-    // Update home widget after event is deleted
     _updateHomeWidgetAsync();
+    notifyListeners();
   }
 
   /// Set the context for widget updates.

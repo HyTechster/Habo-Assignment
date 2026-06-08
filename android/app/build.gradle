@@ -49,7 +49,7 @@ android {
 
     defaultConfig {
         applicationId "com.pavlenko.Habo"
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion flutter.minSdkVersion // flutter_secure_storage encryptedSharedPreferences requires API 23
         compileSdk 36
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()

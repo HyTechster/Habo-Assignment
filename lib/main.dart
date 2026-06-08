@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:habo/auth/auth_service.dart';
 import 'package:habo/habits/habits_manager.dart';
 import 'package:habo/notifications.dart';
 import 'package:habo/services/service_locator.dart';
 import 'package:habo/model/habo_model.dart';
+import 'package:habo/sync/sync_service.dart';
 import 'package:habo/widgets/biometric_auth_wrapper.dart';
 
 import 'package:habo/settings/settings_manager.dart';
@@ -17,6 +19,7 @@ import 'package:habo/navigation/app_router.dart';
 import 'package:habo/navigation/app_state_manager.dart';
 import 'package:habo/navigation/route_information_parser.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:habo/generated/l10n.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -31,6 +34,20 @@ void main() async {
     windowManager.setMinimumSize(const Size(320, 320));
     windowManager.setMaximumSize(Size.infinite);
   }
+
+  // Only initialise Supabase when credentials are supplied via --dart-define.
+  // Without them the app runs entirely offline — zero change for existing users.
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
+    await Supabase.initialize(
+      url: supabaseUrl,
+      publishableKey: supabaseAnonKey,
+      authOptions:
+          const FlutterAuthClientOptions(authFlowType: AuthFlowType.pkce),
+    );
+  }
+
   addLicenses();
   runApp(
     const Habo(),
@@ -49,6 +66,8 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
   final _settingsManager = SettingsManager();
   late HabitsManager _habitManager;
   late AppRouter _appRouter;
+  late AuthService _authService;
+  late SyncService _syncService;
   final _navigatorKey = GlobalKey<NavigatorState>();
   final _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
   bool _isInitialized = false;
@@ -75,6 +94,7 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
       _startDayChangeTimer();
       if (_isInitialized) {
         _habitManager.checkDayChange();
+        _syncService.syncIfReady(); // background sync on resume
       }
     } else if (state == AppLifecycleState.paused) {
       _stopDayChangeTimer();
@@ -107,7 +127,13 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
   }
 
   Future<void> _initializeApp() async {
-    await _settingsManager.initialize();
+    // Seed the current user ID so settings load from the right per-account key
+    // immediately, avoiding a flash of default settings on app restart.
+    String? initialUserId;
+    try {
+      initialUserId = Supabase.instance.client.auth.currentUser?.id;
+    } catch (_) {}
+    await _settingsManager.initialize(userId: initialUserId);
 
     // Create a shared HaboModel instance
     final haboModel = HaboModel();
@@ -145,16 +171,31 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
       habitsManager: habitsManager,
     );
 
+    final authService = AuthService();
+    final syncService = SyncService(
+      authService,
+      onDataChanged: habitsManager.initialize,
+      settingsManager: _settingsManager,
+    );
+
+    // Push to cloud immediately after any local habit change.
+    // _isSyncing guard in syncIfReady() prevents overlapping syncs.
+    habitsManager.addListener(() => syncService.syncIfReady());
+
     setState(() {
+      _authService = authService;
+      _syncService = syncService;
       _habitManager = habitsManager;
       _appRouter = appRouter;
       _isInitialized = true;
     });
 
-    // Update home widget on app launch to ensure correct state
+    // Update home widget and kick off initial background sync
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (context.mounted) {
         await habitsManager.updateHomeWidget(context);
+        syncService.listenForConnectivity();
+        syncService.syncIfReady(); // fire-and-forget background sync
       }
     });
 
@@ -193,6 +234,12 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
         ),
         ChangeNotifierProvider(
           create: (context) => _habitManager,
+        ),
+        ChangeNotifierProvider(
+          create: (context) => _authService,
+        ),
+        ChangeNotifierProvider<SyncService>(
+          create: (context) => _syncService,
         ),
       ],
       child: Consumer<SettingsManager>(builder: (context, settingsManager, _) {

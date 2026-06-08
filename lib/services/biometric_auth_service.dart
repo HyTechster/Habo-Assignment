@@ -44,21 +44,10 @@ class BiometricAuthService {
     bool biometricOnly = false,
   }) async {
     try {
-      // First check if authentication is available based on the requested mode
-      final bool isAvailable = biometricOnly
-          ? await isBiometricAvailable()
-          : await hasDeviceAuthentication();
-      if (!isAvailable) {
-        debugPrint('BiometricAuthService: Authentication not available');
-        return false;
-      }
-
-      // Check if device has authentication methods enrolled
-      final List<BiometricType> availableBiometrics =
-          await getAvailableBiometrics();
-      debugPrint(
-          'BiometricAuthService: Available biometrics: $availableBiometrics');
-
+      // Skip the pre-check and call the platform API directly.
+      // A redundant isDeviceSupported() call can return an inconsistent
+      // result (e.g. on some emulators) and leave the user stuck on the
+      // lock screen even though the init-time check passed.
       final bool didAuthenticate = await _localAuth.authenticate(
         localizedReason: localizedReason,
         biometricOnly: biometricOnly,
@@ -70,7 +59,9 @@ class BiometricAuthService {
       return didAuthenticate;
     } on LocalAuthException catch (e) {
       debugPrint('BiometricAuthService: LocalAuthException - ${e.code}');
-      // Handle specific error cases using the error codes
+      // noCredentialsSet means the device has no PIN/biometric enrolled at all.
+      // Rethrow so the caller can disable the lock setting permanently.
+      if (e.code == LocalAuthExceptionCode.noCredentialsSet) rethrow;
       return false;
     } catch (e) {
       debugPrint('BiometricAuthService: General error: $e');

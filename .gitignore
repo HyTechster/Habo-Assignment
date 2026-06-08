@@ -12,6 +12,8 @@
 .windsurf/
 migrate_working_dir/
 .env
+dart_defines.json
+supabase/
 
 # IntelliJ related
 *.iml
