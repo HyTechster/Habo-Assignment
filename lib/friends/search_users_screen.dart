@@ -144,14 +144,18 @@ class _SearchResultTileState extends State<_SearchResultTile> {
         title: Text(widget.profile.username),
         trailing: alreadyRequested
             ? Text('Pending', style: TextStyle(color: Colors.grey[500]))
-            : ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: HaboColors.primary),
+            : ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: HaboColors.primary,
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: () async {
                   await manager.sendFriendRequest(widget.profile.userId);
                   if (!mounted) return;
                   setState(() => _requestSent = true);
                 },
-                child: const Text('Send Request'),
+                icon: const Icon(Icons.person_add_alt_1, size: 18),
+                label: const Text('Add'),
               ),
       ),
     );
