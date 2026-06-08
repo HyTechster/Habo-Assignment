@@ -10,15 +10,15 @@ import 'package:habo/model/category.dart';
 import 'package:habo/model/habit_data.dart';
 import 'package:habo/services/service_locator.dart';
 
-/// Seeds 10 dummy habits (boolean + progressive) across three categories with
-/// a full year of events up to and including the day the button is tapped.
+/// Seeds 10 dummy habits (boolean + progressive) across three categories.
 ///
-/// Event distribution per day:
-///   40 % → completed  (check for boolean; full progress for numeric)
-///   15 % → skipped
-///   45 % → not so successful  (fail for boolean; partial progress for numeric)
+/// Each habit has its own tracking rate and completion rate to produce
+/// realistic, varied statistics:
+///   trackRate    — probability that any event is logged for a given day
+///   successRate  — probability of completion on logged days
+///   skipRate     — probability of skip on logged days (rest = fail/partial)
 ///
-/// The tap date is always forced to "completed" so statistics show fresh data.
+/// Today is always forced to "completed" so the home screen shows activity.
 /// Compile-time guarded by [kDebugMode] — no-op in release builds.
 class DummyDataSeeder {
   DummyDataSeeder._();
@@ -33,36 +33,62 @@ class DummyDataSeeder {
 
   // ── Habit definitions ─────────────────────────────────────────────────────
   //
-  // type     : 'boolean' | 'numeric'
-  // category : category title string, or null for uncategorised
-  // target   : (numeric only) goal value per day
-  // partial  : (numeric only) value counted as "not so successful" (< target)
-  // unit     : (numeric only) display unit label
+  // type        : 'boolean' | 'numeric'
+  // category    : category title string, or null for uncategorised
+  // target      : (numeric only) goal value per day
+  // partial     : (numeric only) value for partial progress
+  // unit        : (numeric only) display unit label
+  // trackRate   : fraction of days where any event is logged (0–1)
+  // successRate : fraction of logged days that end in completion (0–1)
+  // skipRate    : fraction of logged days that end in skip (0–1)
+  //               remaining fraction = fail / partial progress
 
   static const _habitDefs = [
     // ── Boolean (checkable) ──────────────────────────────────────────────
-    {'title': 'Morning Run',        'category': 'Health',    'type': 'boolean'},
-    {'title': 'Cold Shower',        'category': 'Health',    'type': 'boolean'},
-    {'title': 'Meditate',           'category': 'Mind',      'type': 'boolean'},
-    {'title': 'Journal',            'category': 'Mind',      'type': 'boolean'},
-    {'title': 'No Social Media',    'category': 'Lifestyle', 'type': 'boolean'},
-    {'title': 'Gratitude Practice', 'category': null,        'type': 'boolean'},
+    {
+      'title': 'Morning Run', 'category': 'Health', 'type': 'boolean',
+      'trackRate': 0.75, 'successRate': 0.40, 'skipRate': 0.15,
+    },
+    {
+      'title': 'Cold Shower', 'category': 'Health', 'type': 'boolean',
+      'trackRate': 0.70, 'successRate': 0.30, 'skipRate': 0.20,
+    },
+    {
+      'title': 'Meditate', 'category': 'Mind', 'type': 'boolean',
+      'trackRate': 0.85, 'successRate': 0.60, 'skipRate': 0.10,
+    },
+    {
+      'title': 'Journal', 'category': 'Mind', 'type': 'boolean',
+      'trackRate': 0.80, 'successRate': 0.55, 'skipRate': 0.15,
+    },
+    {
+      'title': 'No Social Media', 'category': 'Lifestyle', 'type': 'boolean',
+      'trackRate': 0.60, 'successRate': 0.20, 'skipRate': 0.25,
+    },
+    {
+      'title': 'Gratitude Practice', 'category': null, 'type': 'boolean',
+      'trackRate': 0.65, 'successRate': 0.35, 'skipRate': 0.20,
+    },
     // ── Numeric (progressive) ────────────────────────────────────────────
     {
       'title': 'Drink Water', 'category': 'Health', 'type': 'numeric',
       'target': 8.0, 'partial': 4.0, 'unit': 'glasses',
+      'trackRate': 0.90, 'successRate': 0.65, 'skipRate': 0.08,
     },
     {
-      'title': 'Read',        'category': 'Mind',   'type': 'numeric',
+      'title': 'Read', 'category': 'Mind', 'type': 'numeric',
       'target': 30.0, 'partial': 15.0, 'unit': 'min',
+      'trackRate': 0.75, 'successRate': 0.50, 'skipRate': 0.15,
     },
     {
-      'title': 'Workout',     'category': 'Health', 'type': 'numeric',
+      'title': 'Workout', 'category': 'Health', 'type': 'numeric',
       'target': 60.0, 'partial': 30.0, 'unit': 'min',
+      'trackRate': 0.70, 'successRate': 0.35, 'skipRate': 0.15,
     },
     {
       'title': 'Daily Steps', 'category': 'Lifestyle', 'type': 'numeric',
       'target': 10000.0, 'partial': 5000.0, 'unit': 'steps',
+      'trackRate': 0.85, 'successRate': 0.70, 'skipRate': 0.05,
     },
   ];
 
@@ -74,7 +100,10 @@ class DummyDataSeeder {
     final categoryMap = await _ensureCategories(manager);
     await _ensureHabits(manager, categoryMap);
     await _seedEvents(manager);
+    // Reload from DB so both home-screen calendar and statistics use the same
+    // data, then sync the category list so the filter row is up to date.
     await manager.initModel();
+    await manager.loadCategories();
   }
 
   // ── Category helpers ──────────────────────────────────────────────────────
@@ -163,9 +192,21 @@ class DummyDataSeeder {
     final yearStart = DateTime.utc(now.year, 1, 1);
     final today = DateTime.utc(now.year, now.month, now.day);
 
+    // Only seed dummy habits — identified by title match — to avoid
+    // overwriting events on any habits the user created themselves.
+    final dummyDefsByTitle = {
+      for (final d in _habitDefs) d['title'] as String: d,
+    };
+
     for (final habit in manager.allHabits) {
       final id = habit.habitData.id;
       if (id == null) continue;
+      final def = dummyDefsByTitle[habit.habitData.title];
+      if (def == null) continue;
+
+      final trackRate = (def['trackRate'] as num).toDouble();
+      final successRate = (def['successRate'] as num).toDouble();
+      final skipRate = (def['skipRate'] as num).toDouble();
 
       final events = _generateEvents(
         habitId: id,
@@ -174,26 +215,36 @@ class DummyDataSeeder {
         habitType: habit.habitData.habitType,
         targetValue: habit.habitData.targetValue,
         partialValue: habit.habitData.partialValue,
+        trackRate: trackRate,
+        successRate: successRate,
+        skipRate: skipRate,
       );
+
+      // Write to DB.
       await eventRepo.insertEventsForHabit(id, events);
+
+      // Also update in-memory so the home-screen calendar shows events
+      // immediately without relying solely on the subsequent initModel reload.
+      habit.habitData.events
+        ..clear()
+        ..addAll(events);
     }
   }
 
   // ── Event generation ──────────────────────────────────────────────────────
 
-  /// Generates one event entry per day in [[start], [end]].
+  /// Generates one event per tracked day in [[start], [end]].
   ///
-  /// Boolean habits:
-  ///   40 % → [DayType.check, '']
-  ///   15 % → [DayType.skip,  '']
-  ///   45 % → [DayType.fail,  '']
+  /// A single RNG roll per day determines both whether the habit is tracked
+  /// and, if so, its outcome:
+  ///   roll ∈ [0, 1 − trackRate)        → no event (untracked day)
+  ///   roll ∈ [1 − trackRate, ...)
+  ///     normalized ∈ [0, successRate)  → completed
+  ///     normalized ∈ [successRate, successRate + skipRate) → skipped
+  ///     normalized ∈ [successRate + skipRate, 1)           → fail / partial
   ///
-  /// Numeric habits:
-  ///   40 % → [DayType.progress, '', targetValue]   (full completion)
-  ///   15 % → [DayType.skip,     '']
-  ///   45 % → [DayType.progress, '', partialValue]  (partial — not so successful)
-  ///
-  /// [end] is always overwritten with a completed event.
+  /// [end] is always overwritten with a completed event so the home screen
+  /// shows activity for today.
   static Map<DateTime, List> _generateEvents({
     required int habitId,
     required DateTime start,
@@ -201,6 +252,9 @@ class DummyDataSeeder {
     required HabitType habitType,
     required double targetValue,
     required double partialValue,
+    required double trackRate,
+    required double successRate,
+    required double skipRate,
   }) {
     final rng = Random(habitId * 2053 + 17);
     final events = <DateTime, List>{};
@@ -210,17 +264,23 @@ class DummyDataSeeder {
     while (!day.isAfter(end)) {
       final roll = rng.nextDouble();
 
+      if (roll < 1.0 - trackRate) {
+        // Untracked day — no event logged.
+        day = day.add(const Duration(days: 1));
+        continue;
+      }
+
+      // Normalise the roll into [0, 1) within the "tracked" portion.
+      final outcome = (roll - (1.0 - trackRate)) / trackRate;
+
       final List event;
-      if (roll < 0.40) {
-        // 40 % completed
+      if (outcome < successRate) {
         event = isNumeric
             ? [DayType.progress, '', targetValue]
             : [DayType.check, ''];
-      } else if (roll < 0.55) {
-        // 15 % skipped
+      } else if (outcome < successRate + skipRate) {
         event = [DayType.skip, ''];
       } else {
-        // 45 % not so successful
         event = isNumeric
             ? [DayType.progress, '', partialValue]
             : [DayType.fail, ''];
@@ -230,7 +290,7 @@ class DummyDataSeeder {
       day = day.add(const Duration(days: 1));
     }
 
-    // Today is always completed.
+    // Today is always completed so the home screen shows a green indicator.
     events[end] = isNumeric
         ? [DayType.progress, '', targetValue]
         : [DayType.check, ''];

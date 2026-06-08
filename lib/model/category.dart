@@ -59,7 +59,6 @@ class Category {
     );
   }
 
-  /// Create a copy of this category with optional field updates
   Category copyWith({
     int? id,
     String? title,

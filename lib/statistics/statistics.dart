@@ -41,8 +41,9 @@ class AllStatistics {
 /// Heatmap completion levels for a single day:
 ///   0 = no event / DayType.clear
 ///   1 = skip
-///   2 = fail OR partial progress (target not reached)
+///   2 = fail
 ///   3 = check OR completed progress (target reached)
+///   4 = partial progress (target not reached)
 ///
 /// Keys are normalised to midnight UTC: DateTime.utc(year, month, day).
 /// Do not use the raw event datetime (stored at noon UTC) as a map key.
@@ -141,6 +142,12 @@ class ComparisonData {
   List<List<String>> habitCategoryList;
   List<String> allCategoryTitles;
 
+  // Per-habit raw event counts — populated in calculateComparison()
+  List<int> totalChecks;
+  List<int> totalSkips;
+  List<int> totalProgress;
+  List<int> totalFails;
+
   ComparisonData({
     required this.habitTitles,
     required this.checkRates,
@@ -150,6 +157,10 @@ class ComparisonData {
     this.habitCategories = const [],
     this.habitCategoryList = const [],
     this.allCategoryTitles = const [],
+    this.totalChecks = const [],
+    this.totalSkips = const [],
+    this.totalProgress = const [],
+    this.totalFails = const [],
   });
 }
 
@@ -353,9 +364,9 @@ class Statistics {
                     ? (value[3] as num?)?.toDouble() ??
                         habit.habitData.targetValue
                     : habit.habitData.targetValue;
-                level = progressValue >= targetAtTime ? 3 : 2;
+                level = progressValue >= targetAtTime ? 3 : 4;
               } else {
-                level = 2;
+                level = 4;
               }
               break;
             default:
@@ -493,20 +504,26 @@ class Statistics {
           weekStart.subtract(Duration(days: weekStart.weekday - 1));
       weekLabels.add(formatter.format(monday));
 
-      int level3Days = 0;
-      int nonZeroDays = 0;
+      // Count per habit-day so the rate stays meaningful regardless of
+      // how many habits the user tracks.  A day with 5 habits logged and
+      // 2 completed contributes 2 successes out of 5 attempts instead of
+      // "1 successful day out of 1 active day" (which inflates to 100%).
+      int completedEntries = 0;
+      int trackedEntries = 0;
 
       for (int d = 0; d < 7; d++) {
         final day = weekStart.add(Duration(days: d));
         final levels = dayLevels[day];
-        if (levels != null && levels.isNotEmpty) {
-          nonZeroDays++;
-          if (levels.any((l) => l == 3)) level3Days++;
+        if (levels != null) {
+          for (final level in levels) {
+            trackedEntries++;
+            if (level == 3) completedEntries++;
+          }
         }
       }
 
       weeklyRates.add(
-          nonZeroDays == 0 ? 0.0 : level3Days / nonZeroDays);
+          trackedEntries == 0 ? 0.0 : completedEntries / trackedEntries);
     }
 
     if (weeklyRates.every((r) => r == 0.0)) return null;
@@ -552,6 +569,12 @@ class Statistics {
     final List<String> habitCategories = [];
     final List<List<String>> habitCategoryList = [];
 
+    // Raw event count fields
+    final List<int> totalChecks = [];
+    final List<int> totalSkips = [];
+    final List<int> totalProgress = [];
+    final List<int> totalFails = [];
+
     for (int i = 0; i < habits.length; i++) {
       final habit = habits[i];
       // Explicitly skip archived habits — different from calculateStatistics
@@ -588,6 +611,11 @@ class Statistics {
           habit.habitData.categories.map((c) => c.title).toList();
       habitCategoryList.add(categoryTitles);
       habitCategories.add(categoryTitles.join(', '));
+
+      totalChecks.add(stat.checks);
+      totalSkips.add(stat.skips);
+      totalProgress.add(stat.progress);
+      totalFails.add(stat.fails);
     }
 
     // Build deduplicated, sorted list of all category names across non-archived habits
@@ -608,6 +636,10 @@ class Statistics {
       habitCategories: habitCategories,
       habitCategoryList: habitCategoryList,
       allCategoryTitles: allCategoryTitles,
+      totalChecks: totalChecks,
+      totalSkips: totalSkips,
+      totalProgress: totalProgress,
+      totalFails: totalFails,
     );
   }
 

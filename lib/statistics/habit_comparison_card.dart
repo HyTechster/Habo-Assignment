@@ -4,7 +4,15 @@ import 'package:habo/settings/settings_manager.dart';
 import 'package:habo/statistics/statistics.dart';
 import 'package:provider/provider.dart';
 
-enum LeaderboardMetric { currentStreak, topStreak, completionRate }
+enum LeaderboardMetric {
+  currentStreak,
+  topStreak,
+  completionRate,
+  totalChecks,
+  totalSkips,
+  totalProgress,
+  totalFails,
+}
 
 enum LeaderboardSort { highestFirst, lowestFirst, byCategory }
 
@@ -16,6 +24,10 @@ class _LeaderboardEntry {
   final int topStreak;
   final double checkRate;
   final List<String> categories;
+  final int totalChecks;
+  final int totalSkips;
+  final int totalProgress;
+  final int totalFails;
 
   const _LeaderboardEntry({
     required this.index,
@@ -24,6 +36,10 @@ class _LeaderboardEntry {
     required this.topStreak,
     required this.checkRate,
     required this.categories,
+    required this.totalChecks,
+    required this.totalSkips,
+    required this.totalProgress,
+    required this.totalFails,
   });
 }
 
@@ -59,6 +75,14 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
         return e.topStreak.toDouble();
       case LeaderboardMetric.completionRate:
         return e.checkRate;
+      case LeaderboardMetric.totalChecks:
+        return e.totalChecks.toDouble();
+      case LeaderboardMetric.totalSkips:
+        return e.totalSkips.toDouble();
+      case LeaderboardMetric.totalProgress:
+        return e.totalProgress.toDouble();
+      case LeaderboardMetric.totalFails:
+        return e.totalFails.toDouble();
     }
   }
 
@@ -70,6 +94,14 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
         return '${e.topStreak}d';
       case LeaderboardMetric.completionRate:
         return '${(e.checkRate * 100).round()}%';
+      case LeaderboardMetric.totalChecks:
+        return '${e.totalChecks}';
+      case LeaderboardMetric.totalSkips:
+        return '${e.totalSkips}';
+      case LeaderboardMetric.totalProgress:
+        return '${e.totalProgress}';
+      case LeaderboardMetric.totalFails:
+        return '${e.totalFails}';
     }
   }
 
@@ -89,6 +121,14 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
           categories: i < d.habitCategoryList.length
               ? d.habitCategoryList[i]
               : const [],
+          totalChecks:
+              i < d.totalChecks.length ? d.totalChecks[i] : 0,
+          totalSkips:
+              i < d.totalSkips.length ? d.totalSkips[i] : 0,
+          totalProgress:
+              i < d.totalProgress.length ? d.totalProgress[i] : 0,
+          totalFails:
+              i < d.totalFails.length ? d.totalFails[i] : 0,
         ),
     ];
 
@@ -190,9 +230,8 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
     _LeaderboardEntry entry,
     int rank,
     double maxValue,
+    Color barColor,
   ) {
-    final checkColor =
-        Provider.of<SettingsManager>(context, listen: false).checkColor;
     final fraction = maxValue > 0
         ? (_metricValue(entry) / maxValue).clamp(0.0, 1.0)
         : 0.0;
@@ -224,7 +263,7 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
                     // Background track
                     Container(
                       decoration: BoxDecoration(
-                        color: checkColor.withValues(alpha: 0.15),
+                        color: barColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -233,7 +272,7 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
                       widthFactor: fraction,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: checkColor,
+                          color: barColor,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -280,10 +319,31 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
 
   @override
   Widget build(BuildContext context) {
-    final checkColor =
-        Provider.of<SettingsManager>(context, listen: false).checkColor;
+    final settings = Provider.of<SettingsManager>(context, listen: false);
+    final checkColor = settings.checkColor;
+    final skipColor = settings.skipColor;
+    final progressColor = settings.progressColor;
+    final failColor = settings.failColor;
     final primaryContainer =
         Theme.of(context).colorScheme.primaryContainer;
+    final muteColor =
+        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
+
+    // Bar colour tracks the active metric so the bar visually matches the type.
+    final Color barColor;
+    switch (_metric) {
+      case LeaderboardMetric.totalSkips:
+        barColor = skipColor;
+        break;
+      case LeaderboardMetric.totalProgress:
+        barColor = progressColor;
+        break;
+      case LeaderboardMetric.totalFails:
+        barColor = failColor;
+        break;
+      default:
+        barColor = checkColor;
+    }
 
     final entries = _filteredSortedList();
     final maxValue = entries.isEmpty
@@ -339,7 +399,7 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
           rowWidgets.add(const Divider(height: 1));
         }
 
-        rowWidgets.add(_buildRow(entry, rank, maxValue));
+        rowWidgets.add(_buildRow(entry, rank, maxValue, barColor));
         needsThinDivider = true;
         rank++;
       }
@@ -356,7 +416,7 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Row 1: card title + metric toggle buttons ─────────────────
+            // ── Row 1: card title + streak/rate metric buttons ────────────
             Row(
               children: [
                 Expanded(
@@ -389,6 +449,50 @@ class _HabitComparisonCardState extends State<HabitComparisonCard> {
                   icon: Icons.check_circle_outline,
                   onPressed: () => setState(
                       () => _metric = LeaderboardMetric.completionRate),
+                ),
+              ],
+            ),
+            const SizedBox(height: 2),
+
+            // ── Row 2: totals count buttons ───────────────────────────────
+            Row(
+              children: [
+                Text(
+                  'Totals:',
+                  style: TextStyle(fontSize: 11, color: muteColor),
+                ),
+                const Spacer(),
+                // Complete count
+                _toggleButton(
+                  active: _metric == LeaderboardMetric.totalChecks,
+                  activeColor: checkColor,
+                  icon: Icons.check,
+                  onPressed: () => setState(
+                      () => _metric = LeaderboardMetric.totalChecks),
+                ),
+                // Skip count
+                _toggleButton(
+                  active: _metric == LeaderboardMetric.totalSkips,
+                  activeColor: skipColor,
+                  icon: Icons.last_page,
+                  onPressed: () => setState(
+                      () => _metric = LeaderboardMetric.totalSkips),
+                ),
+                // Progress count
+                _toggleButton(
+                  active: _metric == LeaderboardMetric.totalProgress,
+                  activeColor: progressColor,
+                  icon: Icons.trending_up,
+                  onPressed: () => setState(
+                      () => _metric = LeaderboardMetric.totalProgress),
+                ),
+                // Fail count
+                _toggleButton(
+                  active: _metric == LeaderboardMetric.totalFails,
+                  activeColor: failColor,
+                  icon: Icons.close,
+                  onPressed: () => setState(
+                      () => _metric = LeaderboardMetric.totalFails),
                 ),
               ],
             ),

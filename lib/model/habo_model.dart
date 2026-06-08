@@ -422,7 +422,7 @@ class HaboModel {
         eventData['targetValue'] = 0.0;
       }
 
-      db.insert('events', eventData,
+      await db.insert('events', eventData,
           conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
       if (kDebugMode) {

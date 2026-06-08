@@ -5,19 +5,20 @@ import 'package:habo/settings/settings_manager.dart';
 import 'package:habo/statistics/statistics.dart';
 import 'package:provider/provider.dart';
 
-/// Displays the best day-of-week and best time-of-day for habit completion,
-/// plus a 7-bar mini chart showing per-weekday check rates.
-///
-/// [BestDayTimeData] is never null — it carries zeroed defaults when there is
-/// insufficient data. The null guards on [bestDayOfWeek] and [bestTimeOfDay]
-/// control which sections render in a muted "no data" state.
-class BestDayTimeCard extends StatelessWidget {
+/// Displays the best day-of-week for habit completion plus a 7-bar chart.
+/// Tapping a bar shows the completion percentage for that day as a tooltip.
+class BestDayTimeCard extends StatefulWidget {
   const BestDayTimeCard({super.key, required this.data});
 
   final BestDayTimeData data;
 
-  // Full English names must match the keys used in BestDayTimeData.dayOfWeekRates
-  // (set by calculateBestDayTime in statistics.dart).
+  @override
+  State<BestDayTimeCard> createState() => _BestDayTimeCardState();
+}
+
+class _BestDayTimeCardState extends State<BestDayTimeCard> {
+  int? _touchedIndex;
+
   static const _weekdays = [
     'Monday',
     'Tuesday',
@@ -40,17 +41,14 @@ class BestDayTimeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Read colours once — listen: false convention used throughout statistics widgets
     final settings = Provider.of<SettingsManager>(context, listen: false);
     final checkColor = settings.checkColor;
-    final progressColor = settings.progressColor;
     final muteColor =
         Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5);
 
-    final bool hasBestDay = data.bestDayOfWeek != null;
-    final bool hasBestTime = data.bestTimeOfDay != null;
+    final bool hasBestDay = widget.data.bestDayOfWeek != null;
 
-    // ── Mini bar chart helpers ───────────────────────────────────────────
+    // ── Bar chart helpers ────────────────────────────────────────────────
 
     Widget bottomTitle(double value, TitleMeta meta) {
       final index = value.round();
@@ -70,15 +68,15 @@ class BestDayTimeCard extends StatelessWidget {
     List<BarChartGroupData> buildBarGroups() {
       return List.generate(7, (i) {
         final dayName = _weekdays[i];
-        final rate = data.dayOfWeekRates[dayName] ?? 0.0;
-        final isBest = data.bestDayOfWeek == dayName;
+        final rate = widget.data.dayOfWeekRates[dayName] ?? 0.0;
+        final isBest = widget.data.bestDayOfWeek == dayName;
+        final isTouched = _touchedIndex == i;
         return BarChartGroupData(
           x: i,
           barRods: [
             BarChartRodData(
               toY: rate * 100,
-              // Best day: full checkColor opacity; all others: 50 % opacity
-              color: isBest
+              color: (isBest || isTouched)
                   ? checkColor
                   : checkColor.withValues(alpha: 0.5),
               width: 12,
@@ -104,8 +102,9 @@ class BestDayTimeCard extends StatelessWidget {
           children: [
             // ── Section title ─────────────────────────────────────────────
             Text(
-              S.of(context).bestDayTimeTitle,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              S.of(context).bestDayLabel.trimRight(),
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
 
@@ -119,8 +118,7 @@ class BestDayTimeCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '${S.of(context).bestDayLabel}'
-                  '${data.bestDayOfWeek ?? S.of(context).notEnoughData}',
+                  widget.data.bestDayOfWeek ?? S.of(context).notEnoughData,
                   style: TextStyle(
                     color: hasBestDay ? null : muteColor,
                   ),
@@ -128,7 +126,7 @@ class BestDayTimeCard extends StatelessWidget {
                 if (hasBestDay) ...[
                   const Spacer(),
                   Text(
-                    '${(data.bestDayRate * 100).round()}%',
+                    '${(widget.data.bestDayRate * 100).round()}%',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: checkColor,
@@ -137,39 +135,50 @@ class BestDayTimeCard extends StatelessWidget {
                 ],
               ],
             ),
-            const SizedBox(height: 8),
-
-            // ── Best time highlight ───────────────────────────────────────
-            Row(
-              children: [
-                Icon(
-                  Icons.schedule,
-                  size: 18,
-                  color: hasBestTime ? progressColor : muteColor,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '${S.of(context).bestTimeLabel}'
-                  '${data.bestTimeOfDay ?? S.of(context).noNotificationsSet}',
-                  style: TextStyle(
-                    color: hasBestTime ? null : muteColor,
-                  ),
-                ),
-              ],
-            ),
             const SizedBox(height: 16),
 
-            // ── Day-of-week mini bar chart ────────────────────────────────
-            // Height 80; maxY 100 (percentage scale). No grid, no border, no touch.
-            // The best-day rod is rendered at full checkColor opacity; all others
-            // at 50 % so the best day stands out clearly.
+            // ── Day-of-week bar chart ─────────────────────────────────────
+            // Tapping a bar shows its completion % as a tooltip.
+            // Best-day rod and touched rod render at full opacity; others at 50 %.
             SizedBox(
               height: 80,
               child: BarChart(
                 BarChartData(
                   maxY: 100,
                   alignment: BarChartAlignment.spaceAround,
-                  barTouchData: BarTouchData(enabled: false),
+                  barTouchData: BarTouchData(
+                    enabled: true,
+                    touchCallback: (FlTouchEvent event,
+                        BarTouchResponse? response) {
+                      setState(() {
+                        if (!event.isInterestedForInteractions ||
+                            response == null ||
+                            response.spot == null) {
+                          _touchedIndex = null;
+                          return;
+                        }
+                        _touchedIndex =
+                            response.spot!.touchedBarGroupIndex;
+                      });
+                    },
+                    touchTooltipData: BarTouchTooltipData(
+                      getTooltipColor: (_) =>
+                          checkColor.withValues(alpha: 0.9),
+                      tooltipPadding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      getTooltipItem:
+                          (group, groupIndex, rod, rodIndex) {
+                        return BarTooltipItem(
+                          '${rod.toY.round()}%',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                   gridData: const FlGridData(show: false),
                   borderData: FlBorderData(show: false),
                   titlesData: FlTitlesData(
@@ -196,15 +205,6 @@ class BestDayTimeCard extends StatelessWidget {
                 curve: Curves.linear,
               ),
             ),
-
-            // ── Disclaimer — only when best-time data is available ────────
-            if (hasBestTime) ...[
-              const SizedBox(height: 8),
-              Text(
-                S.of(context).bestTimeDisclaimer,
-                style: TextStyle(fontSize: 10, color: muteColor),
-              ),
-            ],
           ],
         ),
       ),
