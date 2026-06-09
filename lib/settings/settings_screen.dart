@@ -9,6 +9,8 @@ import 'package:habo/auth/screens/account_screen.dart';
 import 'package:habo/auth/screens/sign_in_screen.dart';
 import 'package:habo/constants.dart';
 import 'package:habo/debug/dummy_data_seeder.dart';
+import 'package:habo/settings/manage_categories_screen.dart';
+import 'package:habo/sync/sync_service.dart';
 import 'package:habo/extensions.dart';
 import 'package:habo/friends/my_profile_screen.dart';
 import 'package:habo/generated/l10n.dart';
@@ -113,6 +115,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
       btnCancelOnPress: () {},
       btnOkOnPress: () async {
         await Provider.of<HabitsManager>(context, listen: false).loadBackup();
+      },
+    ).show();
+  }
+
+  void _showClearCloudDataDialog(BuildContext context) {
+    AwesomeDialog(
+      context: context,
+      dialogBackgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      dialogType: DialogType.warning,
+      headerAnimationLoop: false,
+      animType: AnimType.bottomSlide,
+      title: 'Clear all data?',
+      desc: 'This permanently deletes all your habits, entries and categories '
+          'from both the cloud and this device. This cannot be undone.',
+      btnCancelText: S.of(context).cancel,
+      btnOkText: 'Clear',
+      btnCancelColor: Colors.grey,
+      btnOkColor: Colors.red,
+      btnCancelOnPress: () {},
+      btnOkOnPress: () async {
+        final sync = context.read<SyncService>();
+        final feedback = ServiceLocator.instance.uiFeedbackService;
+        try {
+          await sync.clearAllData();
+          feedback.showSuccess('All data cleared.');
+        } catch (e) {
+          feedback.showError('Failed to clear data: $e');
+        }
       },
     ).show();
   }
@@ -505,6 +535,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                       ListTile(
+                        leading: const Icon(Icons.category_outlined),
+                        title: const Text('Manage categories'),
+                        subtitle: const Text('Remove categories and see their habits'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ManageCategoriesScreen(),
+                          ),
+                        ),
+                      ),
+                      ListTile(
                         title: Text(S.of(context).backup),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -712,6 +754,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               );
                             }
                           },
+                        ),
+                      ],
+                      if (Provider.of<AuthService>(context).isSignedIn) ...[
+                        const Divider(),
+                        ListTile(
+                          leading: const Icon(
+                              Icons.cloud_off_outlined,
+                              color: Colors.red),
+                          title: const Text(
+                            'Clear all data',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          subtitle: const Text(
+                              'Permanently delete all habits and entries'),
+                          onTap: () => _showClearCloudDataDialog(context),
                         ),
                       ],
                       SizedBox(height: 56),

@@ -31,7 +31,7 @@ class AccountScreen extends StatelessWidget {
     feedback.showSuccess('Syncing your data to the cloud and signing out…');
     Navigator.of(context).pop();
 
-    sync.signOut().timeout(const Duration(seconds: 20)).then((_) {
+    sync.signOut().timeout(const Duration(seconds: 60)).then((_) {
       feedback.showSuccess('Signed out');
     }).catchError((e) {
       feedback.showError('Sign out failed: $e');

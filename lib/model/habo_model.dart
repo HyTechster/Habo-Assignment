@@ -50,8 +50,13 @@ class HaboModel {
 
   Future<void> emptyTables() async {
     try {
-      await db.delete('habits');
+      // Delete in dependency order: child tables first to avoid FK constraint
+      // errors, then parent tables. categories/habit_categories must be cleared
+      // here so they don't bleed across account switches.
+      await db.delete('habit_categories');
       await db.delete('events');
+      await db.delete('habits');
+      await db.delete('categories');
     } catch (e) {
       if (kDebugMode) {
         debugPrint(e.toString());

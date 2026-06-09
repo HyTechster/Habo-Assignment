@@ -181,9 +181,13 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
     );
     final friendsManager = FriendsManager(authService);
 
-    // Push to cloud immediately after any local habit change.
-    // _isSyncing guard in syncIfReady() prevents overlapping syncs.
-    habitsManager.addListener(() => syncService.syncIfReady());
+    // Push to cloud after local habit changes. Guard against firing during
+    // a sync cycle — syncIfReady() itself calls _onDataChanged (habitsManager
+    // .initialize) which triggers notifyListeners(), which would re-enter
+    // here, set _pendingSync=true, and cause an infinite sync loop.
+    habitsManager.addListener(() {
+      if (!syncService.isSyncing) syncService.syncIfReady();
+    });
 
     setState(() {
       _authService = authService;

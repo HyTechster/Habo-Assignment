@@ -154,6 +154,35 @@ class SyncService extends ChangeNotifier {
   }
 
   // ---------------------------------------------------------------------------
+  // Cloud data reset
+  // ---------------------------------------------------------------------------
+
+  /// Deletes ALL data for the current user — both cloud (Supabase) and local
+  /// SQLite. The habit list will be empty after this call.
+  Future<void> clearAllData() async {
+    if (!_isSupabaseAvailable || !_authService.isSignedIn) return;
+    final userId = _authService.currentUser!.id;
+
+    // Delete from cloud in child-first order to respect foreign-key constraints.
+    await _client.from('habit_entries').delete().eq('user_id', userId);
+    await _client.from('habit_categories').delete().eq('user_id', userId);
+    await _client.from('habits').delete().eq('user_id', userId);
+    await _client.from('categories').delete().eq('user_id', userId);
+
+    // Wipe local SQLite data so the habit list becomes empty immediately.
+    await _clearLocalData();
+
+    // Clear the sync timestamp so a future sign-out/sign-in starts clean.
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('last_sync_time');
+
+    // Reload from the now-empty DB to refresh the UI.
+    await _onDataChanged();
+
+    debugPrint('[SyncService] clearAllData: cloud + local data deleted for user $userId');
+  }
+
+  // ---------------------------------------------------------------------------
   // Connectivity listener
   // ---------------------------------------------------------------------------
 
@@ -225,36 +254,39 @@ class SyncService extends ChangeNotifier {
   Future<void> _pushLocalHabits() async {
     final habits = await ServiceLocator.instance.haboModel.getAllHabits();
     final userId = _authService.currentUser!.id;
+    final now = DateTime.now().toUtc().toIso8601String();
 
-    for (final habit in habits) {
+    final rows = habits.map((habit) {
       final hd = habit.habitData;
-      await _client.from('habits').upsert(
-        {
-          'user_id': userId,
-          'local_id': hd.id,
-          'title': hd.title,
-          'position': hd.position,
-          'two_day_rule': hd.twoDayRule,
-          'cue': hd.cue,
-          'routine': hd.routine,
-          'reward': hd.reward,
-          'show_reward': hd.showReward,
-          'advanced': hd.advanced,
-          'notification': hd.notification,
-          'not_time': '${hd.notTime.hour}:${hd.notTime.minute}',
-          'sanction': hd.sanction,
-          'show_sanction': hd.showSanction,
-          'accountant': hd.accountant,
-          'habit_type': hd.habitType.index,
-          'target_value': hd.targetValue,
-          'partial_value': hd.partialValue,
-          'unit': hd.unit,
-          'archived': hd.archived,
-          'updated_at': DateTime.now().toUtc().toIso8601String(),
-        },
-        onConflict: 'user_id,local_id',
-      );
-    }
+      return {
+        'user_id': userId,
+        'local_id': hd.id,
+        'title': hd.title,
+        'position': hd.position,
+        'two_day_rule': hd.twoDayRule,
+        'cue': hd.cue,
+        'routine': hd.routine,
+        'reward': hd.reward,
+        'show_reward': hd.showReward,
+        'advanced': hd.advanced,
+        'notification': hd.notification,
+        'not_time': '${hd.notTime.hour}:${hd.notTime.minute}',
+        'sanction': hd.sanction,
+        'show_sanction': hd.showSanction,
+        'accountant': hd.accountant,
+        'habit_type': hd.habitType.index,
+        'target_value': hd.targetValue,
+        'partial_value': hd.partialValue,
+        'unit': hd.unit,
+        'archived': hd.archived,
+        'updated_at': now,
+      };
+    }).toList();
+
+    if (rows.isEmpty) return;
+    await _client
+        .from('habits')
+        .upsert(rows, onConflict: 'user_id,local_id');
   }
 
   Future<void> _pushLocalEntries() async {
@@ -279,7 +311,9 @@ class SyncService extends ChangeNotifier {
       }
     }
 
-    int pushed = 0;
+    final now = DateTime.now().toUtc().toIso8601String();
+    final rows = <Map<String, dynamic>>[];
+
     for (final habit in habits) {
       final remoteHabitId = localIdToRemoteId[habit.habitData.id];
       if (remoteHabitId == null) {
@@ -302,27 +336,39 @@ class SyncService extends ChangeNotifier {
             '-${date.month.toString().padLeft(2, '0')}'
             '-${date.day.toString().padLeft(2, '0')}';
 
-        try {
-          await _client.from('habit_entries').upsert(
-            {
-              'user_id': userId,
-              'habit_id': remoteHabitId,
-              'entry_date': dateStr,
-              'day_type': (value[0] as DayType).index,
-              'comment': (value.length > 1 ? value[1] as String? : null) ?? '',
-              'progress_value':
-                  (value.length > 2 ? value[2] as double? : null) ?? 0.0,
-              'target_value':
-                  (value.length > 3 ? value[3] as double? : null) ?? 0.0,
-              'updated_at': DateTime.now().toUtc().toIso8601String(),
-            },
-            onConflict: 'user_id,habit_id,entry_date',
-          );
-          pushed++;
-          debugPrint('[SyncService] push entries: ✓ ${habit.habitData.title} $dateStr day_type=${(value[0] as DayType).index}');
-        } catch (e) {
-          debugPrint('[SyncService] push entries: ✗ FAILED ${habit.habitData.title} $dateStr — $e');
-        }
+        rows.add({
+          'user_id': userId,
+          'habit_id': remoteHabitId,
+          'entry_date': dateStr,
+          'day_type': (value[0] as DayType).index,
+          'comment': entryComment,
+          'progress_value':
+              (value.length > 2 ? value[2] as double? : null) ?? 0.0,
+          'target_value':
+              (value.length > 3 ? value[3] as double? : null) ?? 0.0,
+          'updated_at': now,
+        });
+      }
+    }
+
+    debugPrint('[SyncService] push entries: ${rows.length} to push');
+
+    // Send in batches — a single request per row would mean thousands of
+    // network round-trips for a year of daily entries across many habits.
+    // PostgREST accepts a list of rows per upsert call, so chunking keeps
+    // each request body reasonably sized while cutting round-trips by ~200x.
+    const batchSize = 200;
+    var pushed = 0;
+    for (var i = 0; i < rows.length; i += batchSize) {
+      final end = (i + batchSize < rows.length) ? i + batchSize : rows.length;
+      final batch = rows.sublist(i, end);
+      try {
+        await _client
+            .from('habit_entries')
+            .upsert(batch, onConflict: 'user_id,habit_id,entry_date');
+        pushed += batch.length;
+      } catch (e) {
+        debugPrint('[SyncService] push entries: ✗ batch $i-$end FAILED — $e');
       }
     }
     debugPrint('[SyncService] push entries: done, pushed $pushed entries');
@@ -332,23 +378,54 @@ class SyncService extends ChangeNotifier {
     final db = ServiceLocator.instance.haboModel.db;
     final userId = _authService.currentUser!.id;
 
+    // Skip if local habits haven't been populated yet (e.g. fresh sign-in
+    // before the pull). Wiping cloud categories at that point would lose data.
+    final localHabits = await db.query('habits', columns: ['id'], limit: 1);
+    if (localHabits.isEmpty) {
+      debugPrint('[SyncService] push categories: local DB empty, skipping');
+      return;
+    }
+
     final cats = await db.query('categories');
     debugPrint('[SyncService] push categories: ${cats.length} local');
 
-    for (final cat in cats) {
-      final localId = cat['id'] as int;
+    // Upsert whatever exists locally.
+    if (cats.isNotEmpty) {
+      final now = DateTime.now().toUtc().toIso8601String();
+      final rows = cats.map((cat) => {
+            'user_id': userId,
+            'local_id': cat['id'] as int,
+            'title': cat['title'] ?? '',
+            'icon_code_point': cat['iconCodePoint'] ?? 0,
+            'font_family': cat['fontFamily'],
+            'updated_at': now,
+          }).toList();
       try {
-        await _client.from('categories').upsert({
-          'user_id': userId,
-          'local_id': localId,
-          'title': cat['title'] ?? '',
-          'icon_code_point': cat['iconCodePoint'] ?? 0,
-          'font_family': cat['fontFamily'],
-          'updated_at': DateTime.now().toUtc().toIso8601String(),
-        }, onConflict: 'user_id,local_id');
+        await _client
+            .from('categories')
+            .upsert(rows, onConflict: 'user_id,local_id');
       } catch (e) {
-        debugPrint('[SyncService] push categories: ✗ FAILED $localId — $e');
+        debugPrint('[SyncService] push categories: ✗ upsert FAILED — $e');
       }
+    }
+
+    // Delete cloud categories that no longer exist locally (user deleted them).
+    // Without this step a deleted category stays in the cloud and gets pulled
+    // back on the next sync, making it reappear in the UI.
+    try {
+      final localIds = cats.map((c) => c['id'] as int).toList();
+      if (localIds.isEmpty) {
+        await _client.from('categories').delete().eq('user_id', userId);
+      } else {
+        // PostgREST "NOT IN list" syntax: not.in.(1,2,3)
+        await _client
+            .from('categories')
+            .delete()
+            .eq('user_id', userId)
+            .not('local_id', 'in', '(${localIds.join(',')})');
+      }
+    } catch (e) {
+      debugPrint('[SyncService] push categories: ✗ stale delete FAILED — $e');
     }
   }
 
@@ -404,9 +481,9 @@ class SyncService extends ChangeNotifier {
 
     // Full replace: wipe remote associations then reinsert from local truth.
     await _client.from('habit_categories').delete().eq('user_id', userId);
-    for (final item in toInsert) {
+    if (toInsert.isNotEmpty) {
       try {
-        await _client.from('habit_categories').insert(item);
+        await _client.from('habit_categories').insert(toInsert);
       } catch (e) {
         debugPrint('[SyncService] push habit_categories: ✗ FAILED — $e');
       }
@@ -425,28 +502,109 @@ class SyncService extends ChangeNotifier {
         prefs.getString('last_sync_time') ?? '1970-01-01T00:00:00.000Z';
     final userId = _authService.currentUser!.id;
     final db = ServiceLocator.instance.haboModel.db;
-    var changed = false;
 
     debugPrint('[SyncService] pull: lastSync=$lastSync');
 
-    // --- habits ---
+    // ── Fetch remote data (bulk requests, one per table) ───────────────────
+    // Habits / categories / entries are delta-filtered by lastSync.
+    // The id-index queries and habit_categories have no updated_at column
+    // so they always return the full user set.
+    //
+    // PostgREST (Supabase) silently caps un-limited queries at 1000 rows.
+    // Habits and categories are small enough that a generous explicit limit
+    // suffices; entries are paginated in chunks of 1000 so a user with many
+    // habits and months of history never loses rows silently.
     final remoteHabits = await _client
         .from('habits')
         .select()
         .eq('user_id', userId)
         .gte('updated_at', lastSync)
-        .isFilter('deleted_at', null);
+        .isFilter('deleted_at', null)
+        .limit(10000);
 
-    debugPrint('[SyncService] pull: ${remoteHabits.length} remote habits');
+    // Full habit id-index needed for entry and habit_category foreign-key mapping.
+    final remoteHabitIndex = await _client
+        .from('habits')
+        .select('id,local_id')
+        .eq('user_id', userId)
+        .limit(10000);
+
+    final remoteIdToLocalId = <String, int>{};
+    for (final r in remoteHabitIndex) {
+      final remoteId = r['id'] as String?;
+      final localId = (r['local_id'] as num?)?.toInt();
+      if (remoteId != null && localId != null) remoteIdToLocalId[remoteId] = localId;
+    }
+
+    List<Map<String, dynamic>> remoteCategories = [];
+    List<Map<String, dynamic>> remoteHabitCats = [];
+    final remoteCatToLocal = <String, int>{};
+
+    try {
+      remoteCategories = await _client
+          .from('categories')
+          .select()
+          .eq('user_id', userId)
+          .gte('updated_at', lastSync)
+          .limit(10000);
+
+      final remoteCatIndex = await _client
+          .from('categories')
+          .select('id,local_id')
+          .eq('user_id', userId)
+          .limit(10000);
+      for (final r in remoteCatIndex) {
+        final remoteId = r['id'] as String?;
+        final localId = (r['local_id'] as num?)?.toInt();
+        if (remoteId != null && localId != null) remoteCatToLocal[remoteId] = localId;
+      }
+
+      remoteHabitCats = await _client
+          .from('habit_categories')
+          .select()
+          .eq('user_id', userId)
+          .limit(10000);
+    } catch (e) {
+      debugPrint('[SyncService] pull categories fetch error (non-fatal): $e');
+    }
+
+    // Entries are the only table that can realistically exceed 1000 rows for
+    // active users, so paginate in chunks of 1000 until the server returns a
+    // partial page (signalling end-of-data).
+    final remoteEntries = <Map<String, dynamic>>[];
+    try {
+      const entryPageSize = 1000;
+      var entryOffset = 0;
+      while (true) {
+        final page = await _client
+            .from('habit_entries')
+            .select()
+            .eq('user_id', userId)
+            .gte('updated_at', lastSync)
+            .range(entryOffset, entryOffset + entryPageSize - 1);
+        remoteEntries.addAll(page);
+        if (page.length < entryPageSize) break;
+        entryOffset += entryPageSize;
+      }
+    } catch (e) {
+      debugPrint('[SyncService] pull entries fetch error (non-fatal): $e');
+    }
+
+    debugPrint('[SyncService] pull: ${remoteHabits.length} habits, '
+        '${remoteCategories.length} categories, '
+        '${remoteHabitCats.length} habit_cats, '
+        '${remoteEntries.length} entries');
+
+    // ── Single SQLite batch transaction ────────────────────────────────────
+    // The events table has PRIMARY KEY(id, dateTime) and habits has
+    // INTEGER PRIMARY KEY — ConflictAlgorithm.ignore silently skips rows
+    // that already exist, so no per-row SELECT existence check is needed.
+    final sqlBatch = db.batch();
 
     for (final rh in remoteHabits) {
       final localId = (rh['local_id'] as num?)?.toInt();
       if (localId == null) continue;
-      final exists = await db.query('habits',
-          where: 'id = ?', whereArgs: [localId]);
-      if (exists.isNotEmpty) continue;
-
-      await db.insert(
+      sqlBatch.insert(
         'habits',
         {
           'id': localId,
@@ -471,169 +629,74 @@ class SyncService extends ChangeNotifier {
         },
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
-      debugPrint('[SyncService] pull: inserted habit localId=$localId (${rh['title']})');
-      changed = true;
     }
 
-    // --- categories ---
-    try {
-      final remoteCategories = await _client
-          .from('categories')
-          .select()
-          .eq('user_id', userId)
-          .gte('updated_at', lastSync);
-
-      debugPrint('[SyncService] pull: ${remoteCategories.length} remote categories');
-
-      for (final rc in remoteCategories) {
-        final localId = (rc['local_id'] as num?)?.toInt();
-        if (localId == null) continue;
-        final exists = await db.query('categories',
-            where: 'id = ?', whereArgs: [localId]);
-        if (exists.isNotEmpty) continue;
-
-        await db.insert('categories', {
+    for (final rc in remoteCategories) {
+      final localId = (rc['local_id'] as num?)?.toInt();
+      if (localId == null) continue;
+      sqlBatch.insert(
+        'categories',
+        {
           'id': localId,
           'title': rc['title'] ?? '',
           'iconCodePoint': (rc['icon_code_point'] as num?)?.toInt() ?? 0,
           'fontFamily': rc['font_family'],
-        }, conflictAlgorithm: ConflictAlgorithm.ignore);
-        changed = true;
-      }
-
-    } catch (e) {
-      debugPrint('[SyncService] pull categories error: $e');
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
     }
 
-    // --- habit_categories (separate block so category pull is never aborted) ---
-    try {
-      final remoteCatIndex = await _client
-          .from('categories')
-          .select('id,local_id')
-          .eq('user_id', userId);
-      final remoteCatToLocal = <String, int>{};
-      for (final r in remoteCatIndex) {
-        final remoteId = r['id'] as String?;
-        final localId = (r['local_id'] as num?)?.toInt();
-        if (remoteId != null && localId != null) remoteCatToLocal[remoteId] = localId;
-      }
-
-      final remoteHabitIndex = await _client
-          .from('habits')
-          .select('id,local_id')
-          .eq('user_id', userId);
-      final remoteHabitToLocal = <String, int>{};
-      for (final r in remoteHabitIndex) {
-        final remoteId = r['id'] as String?;
-        final localId = (r['local_id'] as num?)?.toInt();
-        if (remoteId != null && localId != null) remoteHabitToLocal[remoteId] = localId;
-      }
-
-      final remoteHabitCats = await _client
-          .from('habit_categories')
-          .select()
-          .eq('user_id', userId);
-
-      int hcInserted = 0;
-      for (final rhc in remoteHabitCats) {
-        final localHabitId = remoteHabitToLocal[rhc['habit_id'] as String?];
-        final localCatId = remoteCatToLocal[rhc['category_id'] as String?];
-        if (localHabitId == null || localCatId == null) continue;
-
-        final hcExists = await db.query('habit_categories',
-            where: 'habit_id = ? AND category_id = ?',
-            whereArgs: [localHabitId, localCatId]);
-        if (hcExists.isNotEmpty) continue;
-
-        await db.insert('habit_categories', {
-          'habit_id': localHabitId,
-          'category_id': localCatId,
-        }, conflictAlgorithm: ConflictAlgorithm.ignore);
-        changed = true;
-        hcInserted++;
-      }
-      debugPrint('[SyncService] pull: ${remoteHabitCats.length} remote habit_categories, $hcInserted inserted');
-    } catch (e) {
-      debugPrint('[SyncService] pull habit_categories error: $e');
+    for (final rhc in remoteHabitCats) {
+      final localHabitId = remoteIdToLocalId[rhc['habit_id'] as String?];
+      final localCatId = remoteCatToLocal[rhc['category_id'] as String?];
+      if (localHabitId == null || localCatId == null) continue;
+      sqlBatch.insert(
+        'habit_categories',
+        {'habit_id': localHabitId, 'category_id': localCatId},
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
     }
 
-    // --- habit_entries ---
-    try {
-      final remoteIndex = await _client
-          .from('habits')
-          .select('id,local_id')
-          .eq('user_id', userId);
+    for (final re in remoteEntries) {
+      final localHabitId = remoteIdToLocalId[re['habit_id'] as String?];
+      if (localHabitId == null) continue;
 
-      // Null-safe: Supabase may return integers as num; skip rows with null ids.
-      final remoteIdToLocalId = <String, int>{};
-      for (final r in remoteIndex) {
-        final remoteId = r['id'] as String?;
-        final localId = (r['local_id'] as num?)?.toInt();
-        if (remoteId != null && localId != null) {
-          remoteIdToLocalId[remoteId] = localId;
-        }
-      }
+      final dayTypeIndex = (re['day_type'] as num?)?.toInt() ?? 0;
+      final pullComment = re['comment'] as String? ?? '';
+      if (dayTypeIndex == 0 && pullComment.isEmpty) continue;
 
-      final remoteEntries = await _client
-          .from('habit_entries')
-          .select()
-          .eq('user_id', userId)
-          .gte('updated_at', lastSync);
+      final dateStr = re['entry_date'] as String;
+      final dateParts = dateStr.split('-');
+      final dateTimeStr = DateTime.utc(
+        int.parse(dateParts[0]),
+        int.parse(dateParts[1]),
+        int.parse(dateParts[2]),
+        12,
+      ).toString();
 
-      debugPrint('[SyncService] pull: ${remoteEntries.length} remote entries');
-
-      for (final re in remoteEntries) {
-        final localHabitId = remoteIdToLocalId[re['habit_id'] as String?];
-        if (localHabitId == null) continue;
-
-        final dayTypeIndex = (re['day_type'] as num?)?.toInt() ?? 0;
-        final pullComment = re['comment'] as String? ?? '';
-        // Skip clear entries with no comment — they mean "no mark, no note".
-        // Clear entries WITH a comment are note-only entries — keep them.
-        if (dayTypeIndex == 0 && pullComment.isEmpty) continue;
-
-        final dateStr = re['entry_date'] as String;
-
-        // Store as UTC noon to match transformDate() which the UI uses for all
-        // event key lookups — DateTime.utc(y,m,d,12).toString() == 'YYYY-MM-DD 12:00:00.000Z'
-        final dateParts = dateStr.split('-');
-        final dateTimeStr = DateTime.utc(
-          int.parse(dateParts[0]),
-          int.parse(dateParts[1]),
-          int.parse(dateParts[2]),
-          12,
-        ).toString();
-
-        final exists = await db.query('events',
-            where: "id = ? AND dateTime LIKE ?",
-            whereArgs: [localHabitId, '$dateStr%']);
-        if (exists.isNotEmpty) {
-          debugPrint('[SyncService] pull: entry $dateStr for localHabit=$localHabitId already exists, skipping');
-          continue;
-        }
-
-        await db.insert(
-          'events',
-          {
-            'id': localHabitId,
-            'dateTime': dateTimeStr,
-            'dayType': dayTypeIndex,
-            'comment': re['comment'] ?? '',
-            'progressValue': ((re['progress_value'] as num?) ?? 0.0).toDouble(),
-            'targetValue': ((re['target_value'] as num?) ?? 0.0).toDouble(),
-          },
-          conflictAlgorithm: ConflictAlgorithm.ignore,
-        );
-        debugPrint('[SyncService] pull: ✓ inserted entry $dateStr day_type=$dayTypeIndex for localHabit=$localHabitId');
-        changed = true;
-      }
-    } catch (e) {
-      // Log but don't abort — habit changes above should still trigger a UI refresh.
-      debugPrint('[SyncService] pull entries error: $e');
+      sqlBatch.insert(
+        'events',
+        {
+          'id': localHabitId,
+          'dateTime': dateTimeStr,
+          'dayType': dayTypeIndex,
+          'comment': pullComment,
+          'progressValue': ((re['progress_value'] as num?) ?? 0.0).toDouble(),
+          'targetValue': ((re['target_value'] as num?) ?? 0.0).toDouble(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
     }
+
+    // noResult:false returns the rowid for each INSERT — ConflictAlgorithm
+    // .ignore returns 0 when a row was skipped (already exists locally).
+    // A positive rowid means a genuinely new row was written to SQLite.
+    final batchResults = await sqlBatch.commit(noResult: false);
+    final changed = batchResults.any((r) => r is int && r > 0);
 
     await prefs.setString(
         'last_sync_time', DateTime.now().toUtc().toIso8601String());
+
     debugPrint('[SyncService] pull: done, changed=$changed');
     return changed;
   }

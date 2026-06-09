@@ -274,9 +274,43 @@ class _MyHabitCard extends StatelessWidget {
   }
 }
 
-/// "Friends" — the existing aggregated feed of every friend's visible habits.
-class _FriendsFeedTab extends StatelessWidget {
+/// "Friends" — aggregated feed of every friend's visible habits, shown as an
+/// accordion: one friend open at a time, multiple habits open simultaneously.
+class _FriendsFeedTab extends StatefulWidget {
   const _FriendsFeedTab();
+
+  @override
+  State<_FriendsFeedTab> createState() => _FriendsFeedTabState();
+}
+
+class _FriendsFeedTabState extends State<_FriendsFeedTab> {
+  // Only one friend's habit list is visible at a time.
+  String? _expandedOwnerId;
+
+  // Multiple habits within the expanded friend can be open at once.
+  final Set<String> _expandedHabitIds = {};
+
+  void _toggleFriend(String ownerId) {
+    setState(() {
+      if (_expandedOwnerId == ownerId) {
+        _expandedOwnerId = null;
+        _expandedHabitIds.clear();
+      } else {
+        _expandedOwnerId = ownerId;
+        _expandedHabitIds.clear();
+      }
+    });
+  }
+
+  void _toggleHabit(String habitId) {
+    setState(() {
+      if (_expandedHabitIds.contains(habitId)) {
+        _expandedHabitIds.remove(habitId);
+      } else {
+        _expandedHabitIds.add(habitId);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -311,10 +345,7 @@ class _FriendsFeedTab extends StatelessWidget {
                 ),
               );
             }
-            // Group consecutive ownership into one card per friend so a
-            // friend with several visible habits shows a single avatar/
-            // username header with each habit listed underneath, rather than
-            // a repeated card per habit.
+            // Group by owner so each friend is one accordion card.
             final grouped = <_FeedGroup>[];
             for (final feedHabit in feed) {
               if (grouped.isNotEmpty &&
@@ -325,11 +356,27 @@ class _FriendsFeedTab extends StatelessWidget {
               }
             }
             return RefreshIndicator(
-              onRefresh: manager.loadSocialFeed,
+              onRefresh: () async {
+                setState(() {
+                  _expandedOwnerId = null;
+                  _expandedHabitIds.clear();
+                });
+                await manager.loadSocialFeed();
+              },
               child: ListView.builder(
                 padding: const EdgeInsets.all(12),
                 itemCount: grouped.length,
-                itemBuilder: (context, index) => _FeedFriendCard(group: grouped[index]),
+                itemBuilder: (context, index) {
+                  final group = grouped[index];
+                  final isExpanded = group.owner.userId == _expandedOwnerId;
+                  return _FeedFriendCard(
+                    group: group,
+                    isExpanded: isExpanded,
+                    expandedHabitIds: _expandedHabitIds,
+                    onToggle: () => _toggleFriend(group.owner.userId),
+                    onToggleHabit: _toggleHabit,
+                  );
+                },
               ),
             );
         }
@@ -348,16 +395,24 @@ class _FeedGroup {
 }
 
 class _FeedFriendCard extends StatelessWidget {
-  const _FeedFriendCard({required this.group});
+  const _FeedFriendCard({
+    required this.group,
+    required this.isExpanded,
+    required this.expandedHabitIds,
+    required this.onToggle,
+    required this.onToggleHabit,
+  });
 
   final _FeedGroup group;
+  final bool isExpanded;
+  final Set<String> expandedHabitIds;
+  final VoidCallback onToggle;
+  final void Function(String habitId) onToggleHabit;
 
   void _openComments(BuildContext context, String habitId) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      // FriendsManager is provided at the app root (above the Navigator), so
-      // the sheet's own context can reach it directly — no need to re-wrap.
       builder: (_) => _CommentsSheet(habitId: habitId),
     );
   }
@@ -374,152 +429,220 @@ class _FeedFriendCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final owner = group.owner;
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: HaboColors.primary.withValues(alpha: 0.15),
-                  backgroundImage:
-                      owner.avatarUrl != null ? NetworkImage(owner.avatarUrl!) : null,
-                  child: owner.avatarUrl == null
-                      ? Text(
-                          owner.username.isNotEmpty ? owner.username[0].toUpperCase() : '?',
-                          style: const TextStyle(
-                            color: HaboColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    owner.username,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                    overflow: TextOverflow.ellipsis,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Friend header (always visible) ───────────────────────────────
+          InkWell(
+            onTap: onToggle,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: HaboColors.primary.withValues(alpha: 0.15),
+                    backgroundImage: owner.avatarUrl != null
+                        ? NetworkImage(owner.avatarUrl!)
+                        : null,
+                    child: owner.avatarUrl == null
+                        ? Text(
+                            owner.username.isNotEmpty
+                                ? owner.username[0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(
+                              color: HaboColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          )
+                        : null,
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      owner.username,
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  AnimatedRotation(
+                    turns: isExpanded ? 0.5 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: const Icon(Icons.expand_more),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // ── Habit list (visible only when expanded) ───────────────────────
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            crossFadeState:
+                isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            firstChild: const SizedBox.shrink(),
+            secondChild: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Divider(height: 1),
+                for (final habit in group.habits)
+                  _FeedHabitTile(
+                    habit: habit,
+                    isExpanded: expandedHabitIds.contains(habit.habitId),
+                    onToggle: () => onToggleHabit(habit.habitId),
+                    onComment: () => _openComments(context, habit.habitId),
+                    onReactionCountTap: () => _openReactors(context, habit.habitId),
+                  ),
               ],
             ),
-            for (var i = 0; i < group.habits.length; i++) ...[
-              Divider(height: 24, color: Colors.grey[300]),
-              _FeedHabitTile(
-                habit: group.habits[i],
-                onComment: () => _openComments(context, group.habits[i].habitId),
-                onReactionCountTap: () => _openReactors(context, group.habits[i].habitId),
-              ),
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// A single habit's summary plus its React/Comment row, shown inside a
-/// _FeedFriendCard (one tile per visible habit that friend has).
+/// A single habit row inside a friend's accordion. Collapsed: name + streak.
+/// Expanded: adds the progress bar and react/comment actions.
 class _FeedHabitTile extends StatelessWidget {
   const _FeedHabitTile({
     required this.habit,
+    required this.isExpanded,
+    required this.onToggle,
     required this.onComment,
     required this.onReactionCountTap,
   });
 
   final SharedHabit habit;
+  final bool isExpanded;
+  final VoidCallback onToggle;
   final VoidCallback onComment;
   final VoidCallback onReactionCountTap;
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          habit.title,
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            const Icon(Icons.local_fire_department, color: HaboColors.orange, size: 18),
-            const SizedBox(width: 4),
-            Text('${habit.currentStreak} day streak'),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: habit.completionProgress,
-            minHeight: 8,
-            backgroundColor: HaboColors.progressBackground,
-            valueColor: const AlwaysStoppedAnimation(HaboColors.progress),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          '${(habit.completionProgress * 100).round()}% completed (last 30 days)',
-          style: TextStyle(color: Colors.grey[500], fontSize: 12),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Consumer<FriendsManager>(
-              builder: (context, manager, _) {
-                final reacted = manager.hasReacted(habit.habitId);
-                final count = manager.reactionCount(habit.habitId);
-                final color = reacted ? Colors.redAccent : Colors.grey[600];
-                return Row(
+        // ── Collapsed row: name + streak ─────────────────────────────────
+        InkWell(
+          onTap: onToggle,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    habit.title,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                ),
+                Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton(
-                      onPressed: () => manager.toggleReaction(habit.habitId),
-                      visualDensity: VisualDensity.compact,
-                      icon: Icon(
-                        reacted ? Icons.favorite : Icons.favorite_border,
-                        size: 18,
-                        color: reacted ? Colors.redAccent : Colors.grey,
-                      ),
-                    ),
-                    InkWell(
-                      // Separate from the heart toggle above so tapping the
-                      // count itself opens "who reacted" instead of toggling.
-                      onTap: count > 0 ? onReactionCountTap : null,
-                      borderRadius: BorderRadius.circular(8),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                        child: Text(
-                          count > 0 ? '$count' : 'React',
-                          style: TextStyle(color: color),
-                        ),
-                      ),
+                    const Icon(Icons.local_fire_department,
+                        color: HaboColors.orange, size: 14),
+                    const SizedBox(width: 2),
+                    Text(
+                      '${habit.currentStreak}',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                   ],
-                );
-              },
+                ),
+                const SizedBox(width: 6),
+                AnimatedRotation(
+                  turns: isExpanded ? 0.5 : 0.0,
+                  duration: const Duration(milliseconds: 150),
+                  child: const Icon(Icons.expand_more, size: 18, color: Colors.grey),
+                ),
+              ],
             ),
-            Consumer<FriendsManager>(
-              builder: (context, manager, _) {
-                final count = manager.commentCount(habit.habitId);
-                return TextButton.icon(
-                  onPressed: onComment,
-                  icon: Icon(Icons.mode_comment_outlined, size: 18, color: Colors.grey[600]),
-                  label: Text(
-                    count > 0 ? '$count' : 'Comment',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                );
-              },
-            ),
-          ],
+          ),
         ),
+        // ── Expanded detail: progress bar + react/comment ─────────────────
+        AnimatedCrossFade(
+          duration: const Duration(milliseconds: 150),
+          crossFadeState:
+              isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          firstChild: const SizedBox.shrink(),
+          secondChild: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: habit.completionProgress,
+                    minHeight: 8,
+                    backgroundColor: HaboColors.progressBackground,
+                    valueColor: const AlwaysStoppedAnimation(HaboColors.progress),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${(habit.completionProgress * 100).round()}% completed (last 30 days)',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Consumer<FriendsManager>(
+                      builder: (context, manager, _) {
+                        final reacted = manager.hasReacted(habit.habitId);
+                        final count = manager.reactionCount(habit.habitId);
+                        final color = reacted ? Colors.redAccent : Colors.grey[600];
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () => manager.toggleReaction(habit.habitId),
+                              visualDensity: VisualDensity.compact,
+                              icon: Icon(
+                                reacted ? Icons.favorite : Icons.favorite_border,
+                                size: 18,
+                                color: reacted ? Colors.redAccent : Colors.grey,
+                              ),
+                            ),
+                            InkWell(
+                              onTap: count > 0 ? onReactionCountTap : null,
+                              borderRadius: BorderRadius.circular(8),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 8),
+                                child: Text(
+                                  count > 0 ? '$count' : 'React',
+                                  style: TextStyle(color: color),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    Consumer<FriendsManager>(
+                      builder: (context, manager, _) {
+                        final count = manager.commentCount(habit.habitId);
+                        return TextButton.icon(
+                          onPressed: onComment,
+                          icon: Icon(Icons.mode_comment_outlined,
+                              size: 18, color: Colors.grey[600]),
+                          label: Text(
+                            count > 0 ? '$count' : 'Comment',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const Divider(height: 1),
       ],
     );
   }

@@ -189,8 +189,10 @@ class DummyDataSeeder {
         ServiceLocator.instance.repositoryFactory.eventRepository;
 
     final now = DateTime.now();
-    final yearStart = DateTime.utc(now.year, 1, 1);
-    final today = DateTime.utc(now.year, now.month, now.day);
+    // Use UTC noon to match transformDate(), which is what the UI uses for all
+    // event key lookups. Midnight UTC keys would never match and marks wouldn't show.
+    final yearStart = DateTime.utc(now.year, 1, 1, 12);
+    final today = DateTime.utc(now.year, now.month, now.day, 12);
 
     // Only seed dummy habits — identified by title match — to avoid
     // overwriting events on any habits the user created themselves.

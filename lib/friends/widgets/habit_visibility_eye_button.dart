@@ -30,6 +30,9 @@ class _HabitVisibilityEyeButtonState extends State<HabitVisibilityEyeButton> {
   }
 
   Future<void> _load() async {
+    // Capture the manager while the widget is still mounted — context.read<>()
+    // throws if called after unmount, and the mounted check below comes too late.
+    if (!mounted) return;
     final manager = context.read<FriendsManager>();
     try {
       final cloudId = await manager.cloudHabitIdForLocalId(widget.localHabitId);
@@ -53,7 +56,7 @@ class _HabitVisibilityEyeButtonState extends State<HabitVisibilityEyeButton> {
 
   Future<void> _toggle() async {
     final cloudId = _cloudHabitId;
-    if (cloudId == null) return;
+    if (cloudId == null || !mounted) return;
     final manager = context.read<FriendsManager>();
     final next = !_isShared;
     setState(() {
