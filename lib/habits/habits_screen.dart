@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:habo/friends/friends_manager.dart';
 import 'package:habo/friends/social_feed_screen.dart';
 import 'package:habo/habits/calendar_column.dart';
+import 'package:habo/statistics/statistics_screen.dart';
 import 'package:habo/habits/habits_manager.dart';
 import 'package:habo/settings/settings_manager.dart';
 import 'package:habo/navigation/navigation.dart';
@@ -108,17 +109,22 @@ class _HabitsScreenState extends State<HabitsScreen> {
         appStateManager,
         child,
       ) {
-        // The Social tab is opt-in social functionality — unauthenticated
-        // users must see zero changes to their experience, so the bottom
-        // bar (and the feed it leads to) is absent entirely until signed in.
+        // Tab indices: 0 = Home, 1 = Stats, 2 = Social (signed-in only).
+        // If the user was on Social and signs out, fall back to Home.
         final showSocialTab = Provider.of<AuthService>(context).isSignedIn;
-        final selectedTab = showSocialTab ? _selectedTab : 0;
-        final showingSocial = showSocialTab && selectedTab == 1;
+        final selectedTab =
+            (!showSocialTab && _selectedTab == 2) ? 0 : _selectedTab;
+        final showingStats = selectedTab == 1;
+        final showingSocial = showSocialTab && selectedTab == 2;
 
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              showingSocial ? 'Social' : 'Habo',
+              showingSocial
+                  ? 'Social'
+                  : showingStats
+                      ? S.of(context).statistics
+                      : 'Habo',
               style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             backgroundColor: Colors.transparent,
@@ -179,17 +185,17 @@ class _HabitsScreenState extends State<HabitsScreen> {
                 },
               ),
               IconButton(
-                icon: Icon(
-                  Icons.bar_chart,
-                  semanticLabel: S.of(context).statistics,
+                icon: const Icon(
+                  Icons.help_outline_rounded,
+                  semanticLabel: 'Help',
                 ),
                 color: Colors.grey[400],
-                tooltip: S.of(context).statistics,
+                tooltip: 'Help',
                 onPressed: () {
+                  Provider.of<AppStateManager>(context, listen: false)
+                      .goHelp(true);
                   Provider.of<HabitsManager>(context, listen: false)
                       .hideSnackBar();
-                  Provider.of<AppStateManager>(context, listen: false)
-                      .goStatistics(true);
                 },
               ),
               IconButton(
@@ -208,12 +214,16 @@ class _HabitsScreenState extends State<HabitsScreen> {
               ),
             ],
           ),
-          body: showingSocial ? const SocialFeedScreen() : const CalendarColumn(),
-          // Adding a habit only makes sense on the Home tab — the Social
-          // feed is a read/react/comment view onto friends' habits.
-          floatingActionButton: showingSocial
+          body: showingSocial
+              ? const SocialFeedScreen()
+              : showingStats
+                  ? const StatisticsBody()
+                  : const CalendarColumn(),
+          // Add habit only makes sense on the Home tab.
+          floatingActionButton: (showingSocial || showingStats)
               ? null
               : FloatingActionButton(
+                  tooltip: S.of(context).add,
                   onPressed: () {
                     Provider.of<AppStateManager>(context, listen: false)
                         .goCreateHabit(true);
@@ -227,29 +237,32 @@ class _HabitsScreenState extends State<HabitsScreen> {
                     size: 35.0,
                   ),
                 ),
-          bottomNavigationBar: showSocialTab
-              ? BottomNavigationBar(
-                  currentIndex: selectedTab,
-                  onTap: (index) {
-                    if (index == selectedTab) return;
-                    Provider.of<HabitsManager>(context, listen: false)
-                        .hideSnackBar();
-                    setState(() => _selectedTab = index);
-                  },
-                  items: const [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.home_outlined),
-                      activeIcon: Icon(Icons.home),
-                      label: 'Home',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.groups_outlined),
-                      activeIcon: Icon(Icons.groups),
-                      label: 'Social',
-                    ),
-                  ],
-                )
-              : null,
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: selectedTab,
+            onTap: (index) {
+              Provider.of<HabitsManager>(context, listen: false)
+                  .hideSnackBar();
+              setState(() => _selectedTab = index);
+            },
+            items: [
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.bar_chart_outlined),
+                activeIcon: Icon(Icons.bar_chart),
+                label: 'Stats',
+              ),
+              if (showSocialTab)
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.groups_outlined),
+                  activeIcon: Icon(Icons.groups),
+                  label: 'Social',
+                ),
+            ],
+          ),
         );
       },
     );

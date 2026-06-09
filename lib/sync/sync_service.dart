@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:habo/auth/auth_service.dart';
@@ -16,6 +18,7 @@ class SyncService extends ChangeNotifier {
   bool _isSyncing = false;
   bool _pendingSync = false;
   DateTime? _lastSyncTime;
+  Timer? _debounceTimer;
 
   bool get isSyncing => _isSyncing;
   DateTime? get lastSyncTime => _lastSyncTime;
@@ -236,6 +239,15 @@ class SyncService extends ChangeNotifier {
     }
   }
 
+  /// Debounced sync trigger for user-action changes.
+  /// Rapid edits (e.g. check then immediately uncheck) are coalesced into a
+  /// single sync that runs 500 ms after the last change, ensuring the push
+  /// always sees the final local state rather than an intermediate one.
+  void triggerSync() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), syncIfReady);
+  }
+
   bool get _isSupabaseAvailable {
     try {
       Supabase.instance.client;
@@ -372,6 +384,114 @@ class SyncService extends ChangeNotifier {
       }
     }
     debugPrint('[SyncService] push entries: done, pushed $pushed entries');
+
+    // Propagate entry deletions to the cloud. When a user clears a day the
+    // local SQLite row is deleted, so the push silently drops it. Without this
+    // step the cloud keeps the old entry and pulls it back next cycle
+    // (changed=true), causing the UI to "undo" the user's action.
+    // Guard: skip if local habits are empty — that means a fresh sign-in is
+    // in progress and the pull hasn't restored data yet; deleting cloud entries
+    // here would wipe everything before the pull can bring it back.
+    if (habits.isNotEmpty) {
+      await _reconcileDeletedEntries(userId, localIdToRemoteId);
+    }
+  }
+
+  Future<void> _reconcileDeletedEntries(
+    String userId,
+    Map<int, String> localIdToRemoteId,
+  ) async {
+    try {
+      // Re-read local habits FRESH here rather than using the snapshot built at
+      // the start of _pushLocalEntries. If the user edits an entry during the
+      // push (e.g. rapid check → uncheck), the snapshot is stale and would
+      // cause reconciliation to miss the deletion. A fresh read ensures we see
+      // the actual current state.
+      final currentHabits =
+          await ServiceLocator.instance.haboModel.getAllHabits();
+
+      final localDatesByHabit = <String, Set<String>>{};
+      for (final remoteId in localIdToRemoteId.values) {
+        localDatesByHabit[remoteId] = {};
+      }
+      for (final habit in currentHabits) {
+        final remoteId = localIdToRemoteId[habit.habitData.id];
+        if (remoteId == null) continue;
+        for (final entry in habit.habitData.events.entries) {
+          final date = entry.key;
+          final value = entry.value;
+          if (value.isEmpty) continue;
+          final entryComment =
+              (value.length > 1 ? value[1] as String? : null) ?? '';
+          if ((value[0] as DayType) == DayType.clear && entryComment.isEmpty) {
+            continue;
+          }
+          final dateStr =
+              '${date.year.toString().padLeft(4, '0')}'
+              '-${date.month.toString().padLeft(2, '0')}'
+              '-${date.day.toString().padLeft(2, '0')}';
+          localDatesByHabit[remoteId]?.add(dateStr);
+        }
+      }
+
+      // Fetch all cloud entry dates (paginated — same limit as the pull).
+      final cloudEntries = <Map<String, dynamic>>[];
+      const pageSize = 1000;
+      var offset = 0;
+      while (true) {
+        final page = await _client
+            .from('habit_entries')
+            .select('habit_id, entry_date')
+            .eq('user_id', userId)
+            .range(offset, offset + pageSize - 1);
+        cloudEntries.addAll(page);
+        if (page.length < pageSize) break;
+        offset += pageSize;
+      }
+
+      // Determine which cloud entries are no longer in the local set.
+      final staleByHabit = <String, List<String>>{};
+      final knownHabitIds = localIdToRemoteId.values.toSet();
+      for (final e in cloudEntries) {
+        final habitId = e['habit_id'] as String;
+        if (!knownHabitIds.contains(habitId)) continue;
+        final date = e['entry_date'] as String;
+        if (!(localDatesByHabit[habitId]?.contains(date) ?? false)) {
+          staleByHabit.putIfAbsent(habitId, () => []).add(date);
+        }
+      }
+
+      if (staleByHabit.isEmpty) return;
+
+      final totalStale =
+          staleByHabit.values.fold(0, (sum, list) => sum + list.length);
+      debugPrint(
+        '[SyncService] push entries: removing $totalStale stale cloud entries',
+      );
+
+      // Delete stale dates in batches of 100 per habit.
+      const deleteBatchSize = 100;
+      for (final entry in staleByHabit.entries) {
+        final habitId = entry.key;
+        final staleDates = entry.value;
+        for (var i = 0; i < staleDates.length; i += deleteBatchSize) {
+          final batch = staleDates.sublist(
+            i,
+            (i + deleteBatchSize).clamp(0, staleDates.length),
+          );
+          await _client
+              .from('habit_entries')
+              .delete()
+              .eq('user_id', userId)
+              .eq('habit_id', habitId)
+              .filter('entry_date', 'in', '(${batch.join(',')})');
+        }
+      }
+    } catch (e) {
+      debugPrint(
+        '[SyncService] push entries: ✗ stale reconciliation FAILED — $e',
+      );
+    }
   }
 
   Future<void> _pushLocalCategories() async {

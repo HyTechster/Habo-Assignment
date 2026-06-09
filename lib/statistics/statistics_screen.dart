@@ -42,85 +42,79 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            S.of(context).statistics,
-          ),
+          title: Text(S.of(context).statistics),
           backgroundColor: Colors.transparent,
           iconTheme: Theme.of(context).iconTheme,
         ),
-        body: FutureBuilder(
-            future: Provider.of<HabitsManager>(context).getFutureStatsData(),
-            builder:
-                (BuildContext context, AsyncSnapshot<AllStatistics> snapshot) {
-              if (snapshot.hasData) {
-                if (snapshot.data!.habitsData.isEmpty) {
-                  return const EmptyStatisticsImage();
-                } else {
-                  // Note: getFutureStatsData() is called inside build(),
-                  // which recreates the Future on every HabitsManager
-                  // notification while this screen is open — known
-                  // anti-pattern. Do not fix here to avoid regressions.
-                  final habitsData = snapshot.data!.habitsData;
-
-                  return ListView(
-                    scrollDirection: Axis.vertical,
-                    physics: const BouncingScrollPhysics(),
-                    children: [
-                      // ── Overall pie chart ───────────────────────────────
-                      OverallStatisticsCard(
-                        total: snapshot.data!.total,
-                        habits: habitsData.length,
-                      ),
-                      // HabitComparisonCard: null when fewer than 2
-                      // non-archived habits exist.
-                      if (snapshot.data!.comparison != null)
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: HabitComparisonCard(
-                            data: snapshot.data!.comparison!,
-                          ),
-                        ),
-                      // WeeklyTrendCard: null when the 12-week window has
-                      // no logged events.
-                      if (snapshot.data!.overallWeeklyTrend != null)
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: WeeklyTrendCard(
-                            data: snapshot.data!.overallWeeklyTrend!,
-                          ),
-                        ),
-                      // YearlyHeatmapCard: single multi-row card showing
-                      // all habits — replaces the per-habit cards removed
-                      // from the inner ListView above.
-                      if (snapshot.data!.heatmaps.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: YearlyHeatmapCard(
-                            allHeatmaps: snapshot.data!.heatmaps,
-                            allCategoryTitles:
-                                snapshot.data!.allCategoryTitles,
-                          ),
-                        ),
-                      // BestDayTimeCard: never null — carries zeroed
-                      // defaults when there is insufficient data.
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: BestDayTimeCard(
-                          data: snapshot.data!.bestDayTime,
-                        ),
-                      ),
-                    ],
-                  );
-                }
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    color: HaboColors.primary,
-                  ),
-                );
-              }
-            }),
+        body: const StatisticsBody(),
       ),
+    );
+  }
+}
+
+/// The scrollable statistics content without any Scaffold or AppBar.
+/// Used both by [StatisticsScreen] (full-page navigation) and as an
+/// inline tab body inside [HabitsScreen].
+class StatisticsBody extends StatelessWidget {
+  const StatisticsBody({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: Provider.of<HabitsManager>(context).getFutureStatsData(),
+      builder: (BuildContext context, AsyncSnapshot<AllStatistics> snapshot) {
+        if (snapshot.hasData) {
+          if (snapshot.data!.habitsData.isEmpty) {
+            return const EmptyStatisticsImage();
+          } else {
+            // Note: getFutureStatsData() is called inside build(),
+            // which recreates the Future on every HabitsManager
+            // notification while this screen is open — known
+            // anti-pattern. Do not fix here to avoid regressions.
+            final habitsData = snapshot.data!.habitsData;
+            return ListView(
+              scrollDirection: Axis.vertical,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                OverallStatisticsCard(
+                  total: snapshot.data!.total,
+                  habits: habitsData.length,
+                ),
+                if (snapshot.data!.comparison != null)
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: HabitComparisonCard(
+                      data: snapshot.data!.comparison!,
+                    ),
+                  ),
+                if (snapshot.data!.overallWeeklyTrend != null)
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: WeeklyTrendCard(
+                      data: snapshot.data!.overallWeeklyTrend!,
+                    ),
+                  ),
+                if (snapshot.data!.heatmaps.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: YearlyHeatmapCard(
+                      allHeatmaps: snapshot.data!.heatmaps,
+                      allCategoryTitles: snapshot.data!.allCategoryTitles,
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: BestDayTimeCard(data: snapshot.data!.bestDayTime),
+                ),
+              ],
+            );
+          }
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(color: HaboColors.primary),
+          );
+        }
+      },
     );
   }
 }

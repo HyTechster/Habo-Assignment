@@ -9,4 +9,5 @@ class Routes {
   static String whatsNewPath = '/whatsnew';
   static String friendsPath = '/friends';
   static String activityPath = '/activity';
+  static String helpPath = '/help';
 }

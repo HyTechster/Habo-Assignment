@@ -181,12 +181,13 @@ class _HaboState extends State<Habo> with WidgetsBindingObserver {
     );
     final friendsManager = FriendsManager(authService);
 
-    // Push to cloud after local habit changes. Guard against firing during
-    // a sync cycle — syncIfReady() itself calls _onDataChanged (habitsManager
-    // .initialize) which triggers notifyListeners(), which would re-enter
-    // here, set _pendingSync=true, and cause an infinite sync loop.
+    // Push to cloud after local habit changes. triggerSync() debounces rapid
+    // consecutive edits (e.g. check → uncheck in quick succession) so the sync
+    // always sees the final local state rather than an intermediate one.
+    // The isSyncing guard prevents re-entry when _onDataChanged fires
+    // notifyListeners() mid-sync, which would otherwise queue an extra cycle.
     habitsManager.addListener(() {
-      if (!syncService.isSyncing) syncService.syncIfReady();
+      if (!syncService.isSyncing) syncService.triggerSync();
     });
 
     setState(() {

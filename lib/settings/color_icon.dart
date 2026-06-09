@@ -9,12 +9,14 @@ class ColorIcon extends StatefulWidget {
       required this.color,
       required this.icon,
       required this.defaultColor,
-      required this.onPicked});
+      required this.onPicked,
+      this.tooltip});
 
   final Color color;
   final IconData icon;
   final Color defaultColor;
   final Function onPicked;
+  final String? tooltip;
 
   @override
   State<ColorIcon> createState() => _ColorIconState();
@@ -43,6 +45,7 @@ class _ColorIconState extends State<ColorIcon> {
           height: 32,
           child: IconButton(
             splashColor: Colors.transparent,
+            tooltip: widget.tooltip,
             icon: Icon(
               widget.icon,
               size: 16,

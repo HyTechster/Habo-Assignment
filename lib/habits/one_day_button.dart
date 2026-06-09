@@ -309,13 +309,22 @@ class OneDayButton extends StatelessWidget {
     );
   }
 
+  String? _labelForButton(BuildContext context, InButton button) {
+    if (button.key == const Key('Check')) return S.of(context).check;
+    if (button.key == const Key('Fail')) return S.of(context).fail;
+    if (button.key == const Key('Skip')) return S.of(context).skip;
+    if (button.key == const Key('Plus')) return S.of(context).progress;
+    if (button.key == const Key('Comment')) return S.of(context).note;
+    return null;
+  }
+
   void _showMenu(BuildContext context, List<InButton> icons, int selectedIndex,
       Color? color, Function(InButton) onSelected) {
     final RenderBox renderBox = context.findRenderObject() as RenderBox;
     final overlay =
         Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
 
-    const double menuWidth = 60.0; // Fixed width for consistent centering
+    const double menuWidth = 130.0; // Wide enough for icon + label
     const double itemHeight = 45.0; // Must match PopupMenuItem height
 
     // Calculate global position of the button
@@ -351,11 +360,26 @@ class OneDayButton extends StatelessWidget {
         Offset.zero & overlay.size,
       ),
       items: icons.map((InButton value) {
+        final label = _labelForButton(context, value);
         return PopupMenuItem<InButton>(
           value: value,
-          height: itemHeight, // Increased height for better spacing
-          padding: EdgeInsets.zero, // Remove default padding
-          child: Center(child: value),
+          height: itemHeight,
+          padding: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: label != null
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      value,
+                      const SizedBox(width: 8),
+                      Text(label,
+                          style: const TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w500)),
+                    ],
+                  )
+                : Center(child: value),
+          ),
         );
       }).toList(),
       elevation: 4.0,
