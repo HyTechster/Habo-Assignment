@@ -1,110 +1,154 @@
-[![Screens](https://habo.space/img/social/1.png)](https://habo.space)
+<div align="center">
 
-![Codemagic build status](https://api.codemagic.io/apps/6154a5e032cdf915d1ce822b/6154a5e032cdf915d1ce822a/status_badge.svg)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Translation status](https://hosted.weblate.org/widget/habo/habo/svg-badge.svg)](https://hosted.weblate.org/engage/habo/)
-![GitHub release (with filter)](https://img.shields.io/github/v/release/xpavle00/Habo)
-![GitHub Repo stars](https://img.shields.io/github/stars/xpavle00/Habo)
+<img src="https://habo.space/images/logo.svg" alt="Habo Logo" height="80" />
+
+# Habo
+
+**Simple, open-source habit tracker — CSE6364 enhanced build**
+
+[![Stars](https://img.shields.io/github/stars/xpavle00/Habo?style=flat-square&color=FFD700)](https://github.com/xpavle00/Habo/stargazers)
+[![License](https://img.shields.io/badge/license-GPL--3.0-blue?style=flat-square)](LICENSE)
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?style=flat-square&logo=flutter)](https://flutter.dev)
+[![Weblate](https://img.shields.io/badge/translations-Weblate-brightgreen?style=flat-square)](https://hosted.weblate.org/projects/habo/)
+
+<br/>
+
+[<img src="https://habo.space/images/googleplay_badge_hu_edf4094967c7bf97.webp" height="50" alt="Get it on Google Play" />](https://play.google.com/store/apps/details?id=com.pavlenko.Habo)&nbsp;&nbsp;
+[<img src="https://habo.space/images/appstore_badge_black.svg" height="50" alt="Download on the App Store" />](https://apps.apple.com/us/app/habo-habit-tracker/id1670223360)&nbsp;&nbsp;
+[<img src="https://habo.space/images/izzy_badge_hu_1e22e7507a064b3b.webp" height="50" alt="Get it on IzzyOnDroid" />](https://apt.izzysoft.de/fdroid/index/apk/com.pavlenko.Habo)
+
+</div>
+
+
+## 🔗 **Repo:**  [HyTechster/Habo-Assignment](https://github.com/HyTechster/Habo-Assignment)
+<sub>Original base repo — this project is a modified version of Habo, originally developed by Peter Pavlenko.</sub>
 
 
 
-# Habo - Open-Source Habit Tracking App
+## What is Habo?
 
-Introducing Habo, the open-source habit tracker app that helps you create and maintain healthy habits for a better life. With its user-friendly interface, Habo makes it easy to track your daily routines and monitor your progress.
+Habo is a fast, minimalist habit tracker that respects your privacy. No clutter — just a clean, focused tool for building routines that stick.
 
-With Habo, you can customize your own habit list, set reminders, and add notes to help you stay motivated. Whether you're looking to improve your exercise routine, eat healthier, or simply adopt better habits, Habo is here to help you succeed. 
+This build extends the original Habo with four group-project enhancements: a redesigned onboarding experience, a richer statistics module with heatmaps and trend charts, optional cloud backup via Supabase, and a social layer so signed-in users can share progress and stay accountable with friends.
 
-It is built using the [Flutter](https://flutter.dev/) framework, a popular and powerful cross-platform development tool.
+---
 
 ## Features
 
-- Customize your habit list
-- Set daily reminders
-- Track your progress with insightful statistics
-- Add notes to help keep you motivated
-- And more!
+### ✨ UI/UX Polish
 
-## Getting Started
-
-Currently available on the Play Store, IzzyOnDroid, and App Store.
-
-[![Google play store](https://habo.space/img/resources/en_get.svg)](https://play.google.com/store/apps/details?id=com.pavlenko.Habo)
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="40" alt="Get it at IzzyOnDroid">](https://apt.izzysoft.de/packages/com.pavlenko.Habo)
-<a target="_blank" href="https://apps.apple.com/us/app/habo-habit-tracker/id1670223360?itsct=apps_box_badge&amp;itscg=30200" style="display: inline-block; overflow: hidden; border-radius: 13px; width: 134px; height: 40px;"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1682121600" alt="Download on the App Store" style="border-radius: 13px; width: 134px; height: 40px;"></a>
+A guided, three-page onboarding walks first-time users through the cue → routine → reward habit loop and explains every logging action before they create their first habit. Navigation was also reorganised: a persistent **bottom bar** (Home | Stats | Social) replaces the previous model where Statistics was always a separate pushed route, and new **Archive** and **Help** icons with tooltips were added to the app bar.
 
 
+### 📊 Enhanced Statistics
 
-## Social Features
+The Statistics screen was rebuilt around five cards, replacing the original per-habit monthly bar chart:
 
-Signed-in users (see Cloud Sync) can optionally connect with friends to stay
-accountable together. Everything here is opt-in and requires an account —
-people who use Habo without signing in see no change to their experience.
+- **Overall summary** — a donut chart breaking all logged days into checks, skips, fails, and numeric-habit progress, with your active habit count in the centre
+- **Habit Comparison leaderboard** — ranks every active habit by current streak, top streak, or completion rate; three sort modes and an optional category filter narrow the view
+- **Weekly Trend chart** — a 12-week line chart of your overall completion rate; tap any point to see which habits completed that week; a category dropdown recomputes the line on the fly
+- **Yearly Heatmap** — one colour-coded row per habit grouped by category; consecutive completed days grow progressively darker as a streak lengthens; toggle between a scrollable full-year grid and a monthly calendar view
+- **Best Day & Time** — a seven-bar chart of your average completion rate by weekday, with a highlighted best day and a best-time-of-day label (Morning, Afternoon, Evening, or Night) derived from your notification schedule
 
-- **Friends tab** — appears in the main app bar once you're signed in, with:
-  - **Friends List** — your accepted friends and a summary of their shared habit streaks
-  - **Friend Requests** — accept or reject incoming requests, or cancel ones you've sent
-  - **Search Users** — find people by username and send a friend request
-  - **Friend Profile** — a read-only view of a friend's *shared* habits, including
-    current streak and completion progress, with a "Send Nudge" button per habit
-- **Habit visibility mode** — set from Settings → Profile, this controls what
-  gets summarized for friends:
-  - **All habits** — every (non-archived) habit you have is summarized for
-    friends automatically.
-  - **Chosen habits** — only habits you individually opt in are visible. While
-    this mode is active, every habit in your list shows an eye icon you can
-    tap to show or hide that habit from friends; habits are shown by default.
-    (The same toggle is also available as a "Share with friends" switch in the
-    habit's edit screen.)
-  No habit is ever visible to anyone unless your visibility settings allow it.
-- **Nudges** — friends can send each other a gentle reminder about a shared
-  habit, delivered as a local notification. To prevent spam, each friend can
-  nudge you about a given habit at most once per day.
-- **Social tab** — a bottom navigation bar (Home | Social) appears once
-  you're signed in, splitting into two sub-tabs:
-  - **My Habits** — your own habits with their streak, plus how many friends
-    reacted and a button to open the comment thread — so you can see who's
-    cheering you on without leaving the Social tab.
-  - **Friends** — a feed combining every friend's visible habits (multiple
-    habits from the same friend are grouped under one card) with their
-    current streak and completion progress, where you can:
-    - **React** — toggle a heart on a habit to cheer a friend on (one per person per habit)
-    - **Comment** — open a habit's comment thread and leave encouragement
-- **Activity** — a bell icon in the main app bar (next to Friends) shows you
-  who's reacted to or commented on *your* habits, newest first, with a small
-  badge when there's something new you haven't seen yet.
 
-All social data is stored in Supabase and protected by Row Level Security —
-the database itself enforces that you can only read your own data, your
-friends' public profiles, and habits that have explicitly been shared with
-you (see `supabase/migrations/003_e4_friends.sql`). The rest of the app,
-including all of your personal habit data, continues to work fully offline.
+### ☁️ Authentication & Cloud Sync
+
+Sign in with **email/password** or **Google** to back up all habit data to the cloud and restore it automatically on any device. All habit tracking continues to work fully offline without an account.
+
+- Data pushed to Supabase in batches and pulled as a delta since the last sync
+- Debounced sync on every user edit — changes propagate within seconds
+- Entry-deletion reconciliation: cleared days are removed from the cloud, not silently restored on the next pull
+- Per-user settings isolation: each account keeps its own theme and notification preferences
+
+
+### 👥 Social Friend Features
+
+Signed-in users can optionally connect with friends to stay accountable together. Everything here is opt-in — people who use Habo without signing in see no change to their experience.
+
+- **Friends tab** — appears in the app bar once signed in, with a friends list, incoming/outgoing request management, a username search, and a read-only friend profile showing shared habits and streaks
+- **Habit visibility mode** — choose between sharing all habits automatically or toggling individual habits with a per-row eye icon
+- **Nudges** — send a gentle reminder about a friend's shared habit (rate-limited to once per friend per habit per day)
+- **Social tab** — splits into *My Habits* (your habits with friends' reaction counts) and *Friends* (an aggregated feed where you can react with a heart or open a comment thread)
+- **Activity bell** — badged icon in the app bar showing who reacted to or commented on your habits
+
+All social data is stored in Supabase and protected by Row Level Security. Personal habit data remains local and offline regardless of social settings.
+
+
+### 📱 Core Tracking
+
+- **Multiple completion types**: yes/no check, numeric progress, skip (doesn't break streaks)
+- **Notes & comments**: add context to each check-in
+- **Smart reminders**: gentle nudges at the right time
+- **Calendar view**: see streaks and completions on a scrollable grid
+- **Categories**: group habits by theme
+
+### 🎨 Personalization
+
+- Dark and Light themes
+- Custom check, fail, and skip button colours
+- Drag-and-drop habit reordering
+- Categories with custom icons
+
+### 🔒 Privacy & Control
+
+- **Offline first**: everything works without an internet connection
+- **Biometric lock**: Face ID, Touch ID, or passcode
+- **Export & backup**: own your data, always
+- **Archive**: pause habits without losing history
+- **Open source**: GPL-3.0 licensed, auditable, forkable
+
+### 🌍 Translations
+
+Community-contributed translations via [Weblate](https://hosted.weblate.org/projects/habo/). Want to help bring Habo to your language? No coding required.
+
+---
+
+## Building from Source
+
+**Requirements**
+- Flutter 3.x
+- Dart SDK (bundled with Flutter)
+- Android Studio or Xcode for device targets
+
+```bash
+git clone https://github.com/HyTechster/Habo-Assignment.git
+cd Habo-Assignment
+flutter pub get
+flutter run
+```
+
+---
 
 ## Contributing
 
-We welcome contributions from the community to help make Habo even better! Whether you're a developer, designer, or just an enthusiastic user, there are many ways you can help. 
+Contributions are welcome and appreciated. Here's how to help:
 
-Please read our [contributing guidelines](CONTRIBUTING.md) to learn how you can get involved and make an impact.
+- **Bug reports & feature requests** → [Open an issue](https://github.com/xpavle00/Habo/issues)
+- **Code contributions** → Fork, branch, PR; please open an issue first for large changes
+- **Translations** → Join the project on [Weblate](https://hosted.weblate.org/projects/habo/) — no coding required
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
+
+---
+
+## Support the Project
+
+Habo is a one-person open-source project. If it's useful to you, consider supporting its development:
+
+- ⭐ Star the repo: it helps others find the project
+- ☕ [Buy me a coffee](https://buymeacoffee.com/peterpavlenko)
+- 💬 Leave a review on the [App Store](https://apps.apple.com/us/app/habo-habit-tracker/id1670223360) or [Google Play](https://play.google.com/store/apps/details?id=com.pavlenko.Habo)
+
+---
 
 ## License
 
-Habo is released under the [GPL-3.0 license](LICENSE). Feel free to use, modify, and distribute it as you wish. 
+Habo is released under the [GNU General Public License v3.0](LICENSE).
 
-## Localization
-We believe that the best tools should be available to everyone, no matter what language they speak. To make Habo more accessible to users worldwide, we're excited to offer community-driven localization through Weblate.
+---
 
-<a href="https://hosted.weblate.org/engage/habo/">
-<img src="https://hosted.weblate.org/widget/habo/open-graph.png" alt="Translation status" width="350" />
-</a>
+<div align="center">
 
-## Acknowledgments
+Made with ❤️ by [Peter Pavlenko](https://github.com/xpavle00)
 
-Special thanks to [Flutter](https://flutter.dev/) and [Dart](https://dart.dev/) teams for creating such amazing tools. 
-
-We hope you enjoy using Habo and find it helpful in building better habits for a better life!
-
-## Support
-
-If you like this project you can [buy me a coffee](https://www.buymeacoffee.com/peterpavlenko).
-
-<a href="https://www.buymeacoffee.com/peterpavlenko" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-
+</div>
