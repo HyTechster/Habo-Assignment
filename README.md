@@ -20,9 +20,14 @@
 </div>
 
 
-## 🔗 **Repo:**  [HyTechster/Habo-Assignment](https://github.com/HyTechster/Habo-Assignment)
-<sub>Original base repo — this project is a modified version of Habo, originally developed by Peter Pavlenko.</sub>
+## 🔗 **Repo:** [HyTechster/Habo-Assignment](https://github.com/HyTechster/Habo-Assignment)
 
+| Branch | Description |
+|---|---|
+| [`original`](https://github.com/HyTechster/Habo-Assignment/tree/original) | Unmodified Habo v3.1.2 — baseline for comparison, no changes made |
+| [`updated`](https://github.com/HyTechster/Habo-Assignment/tree/updated) | Our group's enhanced build — all four CSE6364 enhancements (E1–E4) applied |
+
+<sub>Original base repo — this project is a modified version of [Habo](https://github.com/xpavle00/Habo), originally developed by Peter Pavlenko.</sub>
 
 
 ## What is Habo?
